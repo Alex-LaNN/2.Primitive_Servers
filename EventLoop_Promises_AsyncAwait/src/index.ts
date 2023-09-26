@@ -1,8 +1,14 @@
 import fetch from "node-fetch";
+// URL-адрес API для получения IP-адреса пользователя с форматом JSON.
+const ipifyApiUrl = "https://api.ipify.org?format=json";
+// URL для получения случайного имени с использованием Random Data API.
+const randomNameApiUrl = "https://random-data-api.com/api/name/random_name";
+// URL-адрес API для получения случайного 'User'а с использованием Random Data API.
+const randomUserApiUrl = "https://random-data-api.com/api/users/random_user";
 
 // 1.
 // Sending an asynchronous GET request to an external API.
-const response = await fetch("https://api.ipify.org?format=json");
+const response = await fetch(ipifyApiUrl);
 // Parse the JSON response received from the server and store the result in the "data" variable.
 const data: any = await response.json();
 console.log("1) Your IP address: " + data.ip);
@@ -11,7 +17,7 @@ console.log("1) Your IP address: " + data.ip);
 async function getIpAddress() {
   try {
     // Sending an asynchronous GET request to an external API specifying the data format to be received.
-    const response = await fetch("https://api.ipify.org?format=json");
+    const response = await fetch(ipifyApiUrl);
     // Parsing the JSON response received from the server and storing the result in the "data" variable.
     const data: any = await response.json();
     // Extracting the IP address from the received data.
@@ -30,12 +36,10 @@ getIpAddress();
 // Function to get random names from external API.
 async function getRandomNames() {
   try {
-    const apiUrl = "https://random-data-api.com/api/name/random_name";
-
     // Creating an array of promises for three requests.
     const promises = Array.from({ length: 3 }, async () => {
       // Sending a GET request to an external API.
-      const response = await fetch(apiUrl);
+      const response = await fetch(randomNameApiUrl);
       // Checking the success of the HTTP response.
       if (!response.ok) {
         throw new Error(`3.1) error HTTP: ${response.status}`);
@@ -66,15 +70,12 @@ getRandomNames()
     console.error(`3.1) error: ${error.message}`);
   });
 
-
 // 3.2
 // Asynchronous function to get a random name.
 async function getRandomName() {
   try {
     // Sending an asynchronous GET request to an external API.
-    const response = await fetch(
-      "https://random-data-api.com/api/name/random_name"
-    );
+    const response = await fetch(randomNameApiUrl);
     // We parse the JSON response received from the server and extract the name value.
     const data = await response.json();
     return data.first_name;
@@ -110,6 +111,159 @@ getNamesWithoutPromiseAll()
   // Display an error message in case of any failure.
   .catch((error) => console.error(`error in 3.2: ${error.message}`));
 
-
 // 3.3
-// 
+// The function returns 'Promise' to get a random name.
+function getRandomName2() {
+  return new Promise((resolve, reject) => {
+    // Sending an asynchronous GET request to a specific API.
+    fetch(randomNameApiUrl)
+      .then((response) => {
+        // Checking the success of the HTTP response.
+        if (!response.ok) {
+          throw new Error(`error HTTP in 3.3: ${response.status}`);
+        }
+        // Converting the response to JSON.
+        return response.json();
+      })
+      .then((data) => {
+        // Resolving 'Promise' with the received name.
+        resolve(data.first_name);
+      })
+      .catch((error) => {
+        // Rejecting 'Promise' with error.
+        reject(error);
+      });
+  });
+}
+
+// The function returns 'Promise' to get three random names.
+function getThreeNamesWithPromises() {
+  const promises: any[] = [];
+
+  // The function adds a random name to the 'promises' array (accumulating 3 names).
+  function getNextName() {
+    if (promises.length < 3) {
+      promises.push(getRandomName2());
+      getNextName();
+    }
+  }
+
+  getNextName();
+
+  return new Promise((resolve, reject) => {
+    const results: String[] = [];
+
+    // Function to check whether all names have been received.
+    function checkComplete() {
+      if (results.length === 3) {
+        resolve(results);
+      }
+    }
+
+    // Iterating through the "promises" array, processing each 'Promise'.
+    promises.forEach((promise, index) => {
+      promise
+        .then((name: String) => {
+          // Saving the received name in "results".
+          results[index] = name;
+          // Checking to see if all names have been received.
+          checkComplete();
+        })
+        .catch((error: any) => {
+          // Rejecting 'Promise' with "error".
+          reject(error);
+        });
+    });
+  });
+}
+
+// Using the 'getThreeNamesWithPromises()' function.
+getThreeNamesWithPromises()
+  .then((names) =>
+    console.log(`3.3) The query resulted in the following names: ${names}`)
+  )
+  .catch((error) => console.error(`error in 3.3: ${error.message}`));
+
+// 4.1 Finding a female user without using 'async/await'.
+// Structure of the 'User' object.
+interface User {
+  gender: string; // User gender (for example, "Male" or "Female").
+  first_name: string; // Username.
+  last_name: string; //  User's last name.
+}
+// The function returns 'Promise' to get a random user.
+function getRandomUser(): Promise<User> {
+  return fetch(randomUserApiUrl).then((response) => {
+    // We check the success of the HTTP response.
+    if (!response.ok) {
+      throw new Error(`error HTTP in 4.1: ${response.status}`);
+    }
+    // Convert the response to 'JSON' and specify the type explicitly.
+    return response.json() as Promise<User>; ///////////??????????????????????
+  });
+}
+
+// Looks for a random female user and returns a 'Promise' with information about her.
+function findRandomWoman(): Promise<User> {
+  // The function recursively gets a random user and checks their gender.
+  function getNextUser(): Promise<User> {
+    return getRandomUser().then((user: User) => {
+      // If the user is female.
+      if (user.gender === "Female") {
+        return user;
+      }
+      // If the user is not female, 'getNextUser()' is called again to get the next user.
+      return getNextUser();
+    });
+  }
+
+  // Start searching for a female user.
+  return getNextUser();
+}
+
+// Using the 'findRandomWoman()' function.
+findRandomWoman()
+  .then((woman) =>
+    console.log(
+      `4.1)Первый найденный 'User' женского пола:
+      gender: ${JSON.stringify(woman.gender)}
+      first_name: ${JSON.stringify(woman.first_name)}
+      last_name: ${JSON.stringify(woman.last_name)}`
+    )
+  )
+  .catch((error) => console.error(`error in 4.1: ${error.message}`));
+
+// 4.2 Finding a random female user using 'async/await'.
+async function getRandomUserWithAsincAwait() {
+  // Sending an asynchronous GET request to a specific API.
+  const response = await fetch(randomUserApiUrl);
+  // If the HTTP response is not successful, an error is thrown.
+  if (!response.ok) {
+    throw new Error(`error HTTP in 4.2: ${response.status}`);
+  }
+  return response.json();
+}
+// Function to find random female user using 'async/await'.
+async function findRandomWomanWithAsincAwait() {
+  // Getting a random female user.
+  while (true) {
+    const user = await getRandomUserWithAsincAwait();
+    if (user.gender === "Female") {
+      return user;
+    }
+  }
+}
+
+// Using the 'findRandomWomanWithAsincAwait()' function.
+findRandomWomanWithAsincAwait()
+  .then((woman) =>
+    console.log(
+      `4.2) Первый найденный юзер женского пола:
+      gender: ${JSON.stringify(woman.gender)}
+      first_name: ${JSON.stringify(woman.first_name)}
+      last_name: ${JSON.stringify(woman.last_name)}`
+    )
+  )
+  .catch((error) => console.error(`error in 4.2: ${error.message}`));
+
+// 5.
