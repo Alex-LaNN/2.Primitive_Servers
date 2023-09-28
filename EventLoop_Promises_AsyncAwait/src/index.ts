@@ -225,7 +225,7 @@ function findRandomWoman(): Promise<User> {
 findRandomWoman()
   .then((woman) =>
     console.log(
-      `4.1)Первый найденный 'User' женского пола:
+      `4.1) Первый найденный 'User' женского пола:
       gender: ${JSON.stringify(woman.gender)}
       first_name: ${JSON.stringify(woman.first_name)}
       last_name: ${JSON.stringify(woman.last_name)}`
@@ -258,7 +258,7 @@ async function findRandomWomanWithAsincAwait() {
 findRandomWomanWithAsincAwait()
   .then((woman) =>
     console.log(
-      `4.2) Первый найденный юзер женского пола:
+      `4.2) Первый найденный 'User' женского пола:
       gender: ${JSON.stringify(woman.gender)}
       first_name: ${JSON.stringify(woman.first_name)}
       last_name: ${JSON.stringify(woman.last_name)}`
@@ -267,3 +267,36 @@ findRandomWomanWithAsincAwait()
   .catch((error) => console.error(`error in 4.2: ${error.message}`));
 
 // 5.
+// Function #1, which accepts a callback and calls it with the current IP.
+async function getIpAddress5(callback: any) {
+  // Sending an asynchronous GET request to an external API.
+  const data = await fetch(ipifyApiUrl);
+  // Parse the JSON response received from the server.
+  const ipAddressData = await data.json();
+  // Call a callback with an IP address.
+  callback(ipAddressData.ip);
+}
+
+// Function #2, which can be used with async/await and which uses function #1.
+async function useGetIpAddress() {
+  return new Promise((resolve) => {
+    // Calling function No. 1 and passing a callback to it.
+    getIpAddress5((ipAddress: any) => {
+      resolve(ipAddress);
+    });
+  });
+}
+
+// Using feature #2 with async/await.
+async function run() {
+  try {
+    const ipAddress = await useGetIpAddress();
+    console.log(`5) Текущий IP-адрес: ${ipAddress}`);
+  } catch (error) {
+    console.error(`error in 4.2: ${error}`);
+  }
+}
+
+run();
+
+// 6.

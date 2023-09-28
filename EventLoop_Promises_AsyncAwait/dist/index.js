@@ -105,33 +105,33 @@ getNamesWithoutPromiseAll()
     // Display an error message in case of any failure.
     .catch((error) => console.error(`error in 3.2: ${error.message}`));
 // 3.3
-// Функция возвращает 'Promise' для получения случайного имени.
+// The function returns 'Promise' to get a random name.
 function getRandomName2() {
     return new Promise((resolve, reject) => {
-        // Отправка асинхронного GET-запроса к определенному API.
+        // Sending an asynchronous GET request to a specific API.
         fetch(randomNameApiUrl)
             .then((response) => {
-            // Проверка успешности HTTP-ответа.
+            // Checking the success of the HTTP response.
             if (!response.ok) {
                 throw new Error(`error HTTP in 3.3: ${response.status}`);
             }
-            // Преобразование ответа в JSON.
+            // Converting the response to JSON.
             return response.json();
         })
             .then((data) => {
-            // Разрешение 'Promise'а с полученным именем.
+            // Resolving 'Promise' with the received name.
             resolve(data.first_name);
         })
             .catch((error) => {
-            // Отклонение 'Promise'а с ошибкой.
+            // Rejecting 'Promise' with error.
             reject(error);
         });
     });
 }
-// Функция возвращает 'Promise' для получения трех случайных имен.
+// The function returns 'Promise' to get three random names.
 function getThreeNamesWithPromises() {
     const promises = [];
-    // Функция добавляет случайное имя в массив 'promises' (с накоплением 3х имен).
+    // The function adds a random name to the 'promises' array (accumulating 3 names).
     function getNextName() {
         if (promises.length < 3) {
             promises.push(getRandomName2());
@@ -141,78 +141,79 @@ function getThreeNamesWithPromises() {
     getNextName();
     return new Promise((resolve, reject) => {
         const results = [];
-        // Функция для проверки: все ли имена получены.
+        // Function to check whether all names have been received.
         function checkComplete() {
             if (results.length === 3) {
                 resolve(results);
             }
         }
-        // Итерирование по массиву "promises" с обработкой каждого 'Promise'а.
+        // Iterating through the "promises" array, processing each 'Promise'.
         promises.forEach((promise, index) => {
             promise
                 .then((name) => {
-                // Сохранение полученного имени в "results".
+                // Saving the received name in "results".
                 results[index] = name;
-                // Проверка - все ли имена получены.
+                // Checking to see if all names have been received.
                 checkComplete();
             })
                 .catch((error) => {
-                // Отклонение 'Promise'а с "error".
+                // Rejecting 'Promise' with "error".
                 reject(error);
             });
         });
     });
 }
-// Демонстрация использования функции 'getThreeNamesWithPromises()'.
+// Using the 'getThreeNamesWithPromises()' function.
 getThreeNamesWithPromises()
     .then((names) => console.log(`3.3) The query resulted in the following names: ${names}`))
     .catch((error) => console.error(`error in 3.3: ${error.message}`));
-// Функция возвращает 'Promise' для получения случайного пользователя.
+// The function returns 'Promise' to get a random user.
 function getRandomUser() {
     return fetch(randomUserApiUrl).then((response) => {
-        // Проверяем успешность HTTP-ответа.
+        // We check the success of the HTTP response.
         if (!response.ok) {
             throw new Error(`error HTTP in 4.1: ${response.status}`);
         }
-        // Преобразуем ответ в 'JSON' и явно указываем тип.
-        return response.json();
+        // Convert the response to 'JSON' and specify the type explicitly.
+        return response.json(); ///////////??????????????????????
     });
 }
-// Функция ищет случайного пользователя-женщину и возвращает 'Promise' с информацией о ней.
+// Looks for a random female user and returns a 'Promise' with information about her.
 function findRandomWoman() {
-    // Функция 'getNextUser()' рекурсивно получает случайного пользователя и проверяет его пол.
+    // The function recursively gets a random user and checks their gender.
     function getNextUser() {
         return getRandomUser().then((user) => {
+            // If the user is female.
             if (user.gender === "Female") {
                 return user;
             }
-            // Если пользователь не является женщиной, вызывается снова 'getNextUser()', чтобы получить следующего пользователя.
+            // If the user is not female, 'getNextUser()' is called again to get the next user.
             return getNextUser();
         });
     }
-    // Начало поиска пользователя-женщины.
+    // Start searching for a female user.
     return getNextUser();
 }
-// Демонсьрация использования функции 'findRandomWoman()'.
+// Using the 'findRandomWoman()' function.
 findRandomWoman()
-    .then((woman) => console.log(`4.1)Первый найденный 'User' женского пола:
+    .then((woman) => console.log(`4.1) Первый найденный 'User' женского пола:
       gender: ${JSON.stringify(woman.gender)}
       first_name: ${JSON.stringify(woman.first_name)}
       last_name: ${JSON.stringify(woman.last_name)}`))
     .catch((error) => console.error(`error in 4.1: ${error.message}`));
-// 4.2 Поиск пользователя женского пола c использованием 'async/await'.
+// 4.2 Finding a random female user using 'async/await'.
 async function getRandomUserWithAsincAwait() {
-    // Отправка асинхронного GET-запроса к определенному API.
+    // Sending an asynchronous GET request to a specific API.
     const response = await fetch(randomUserApiUrl);
-    // Если HTTP-ответ не успешен - выбработка ошибки.
+    // If the HTTP response is not successful, an error is thrown.
     if (!response.ok) {
         throw new Error(`error HTTP in 4.2: ${response.status}`);
     }
     return response.json();
 }
-// Функция поиска случайного пользователя-женщины с использованием 'async/await'.
+// Function to find random female user using 'async/await'.
 async function findRandomWomanWithAsincAwait() {
-    // Получение случайного пользователя-женщины.
+    // Getting a random female user.
     while (true) {
         const user = await getRandomUserWithAsincAwait();
         if (user.gender === "Female") {
@@ -220,11 +221,41 @@ async function findRandomWomanWithAsincAwait() {
         }
     }
 }
-// Пример использования функции 'findRandomWomanWithAsincAwait()'.
+// Using the 'findRandomWomanWithAsincAwait()' function.
 findRandomWomanWithAsincAwait()
-    .then((woman) => console.log(`4.2) Первый найденный юзер женского пола:
+    .then((woman) => console.log(`4.2) Первый найденный 'User' женского пола:
       gender: ${JSON.stringify(woman.gender)}
       first_name: ${JSON.stringify(woman.first_name)}
       last_name: ${JSON.stringify(woman.last_name)}`))
     .catch((error) => console.error(`error in 4.2: ${error.message}`));
 // 5.
+// Функция №1, которая принимает коллбек и вызывает его с текущим IP.
+async function getIpAddress5(callback) {
+    // 
+    const data = await fetch(ipifyApiUrl);
+    const ipAddress = await data.json();
+    // Вызываем коллбек с IP-адресом.
+    callback(ipAddress.ip);
+}
+// Функция №2, которую можно использовать с async/await и которая использует функцию №1.
+async function useGetIpAddress() {
+    return new Promise((resolve) => {
+        // Вызываем функцию №1 и передаем ей коллбек.
+        getIpAddress5((ipAddress) => {
+            // Когда функция №1 вызывает коллбек с IP-адресом, мы разрешаем обещание (Promise).
+            resolve(ipAddress);
+        });
+    });
+}
+// Пример использования функции №2 с async/await.
+async function main() {
+    try {
+        const ipAddress = await useGetIpAddress();
+        console.log(`5) Текущий IP-адрес: ${ipAddress}`);
+    }
+    catch (error) {
+        console.error(`error in 4.2: ${error}`);
+    }
+}
+// Запускаем основную функцию.
+main();
