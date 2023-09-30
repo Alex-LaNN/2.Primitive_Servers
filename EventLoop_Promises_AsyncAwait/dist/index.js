@@ -175,7 +175,7 @@ function getRandomUser() {
             throw new Error(`error HTTP in 4.1: ${response.status}`);
         }
         // Convert the response to 'JSON' and specify the type explicitly.
-        return response.json(); ///////////??????????????????????
+        return response.json();
     });
 }
 // Looks for a random female user and returns a 'Promise' with information about her.
@@ -229,33 +229,55 @@ findRandomWomanWithAsincAwait()
       last_name: ${JSON.stringify(woman.last_name)}`))
     .catch((error) => console.error(`error in 4.2: ${error.message}`));
 // 5.
-// Функция №1, которая принимает коллбек и вызывает его с текущим IP.
+// Function #1, which accepts a callback and calls it with the current IP.
 async function getIpAddress5(callback) {
-    // 
+    // Sending an asynchronous GET request to an external API.
     const data = await fetch(ipifyApiUrl);
-    const ipAddress = await data.json();
-    // Вызываем коллбек с IP-адресом.
-    callback(ipAddress.ip);
+    // Parse the JSON response received from the server.
+    const ipAddressData = await data.json();
+    // Call a callback with an IP address.
+    callback(ipAddressData.ip);
 }
-// Функция №2, которую можно использовать с async/await и которая использует функцию №1.
+// Function #2, which can be used with async/await and which uses function #1.
 async function useGetIpAddress() {
     return new Promise((resolve) => {
-        // Вызываем функцию №1 и передаем ей коллбек.
+        // Calling function No. 1 and passing a callback to it.
         getIpAddress5((ipAddress) => {
-            // Когда функция №1 вызывает коллбек с IP-адресом, мы разрешаем обещание (Promise).
             resolve(ipAddress);
         });
     });
 }
-// Пример использования функции №2 с async/await.
-async function main() {
+// Using feature #2 with async/await.
+async function run() {
     try {
         const ipAddress = await useGetIpAddress();
-        console.log(`5) Текущий IP-адрес: ${ipAddress}`);
+        console.log(`5) Your IP address: ${ipAddress}`);
     }
     catch (error) {
         console.error(`error in 4.2: ${error}`);
     }
 }
-// Запускаем основную функцию.
-main();
+run();
+// 6.
+// Function No.1 for getting the current IP address and calling a callback with this IP.
+async function getIpAddress6(callback) {
+    // Sending an asynchronous GET request to an external API.
+    const response = await fetch(ipifyApiUrl);
+    // Parse the JSON response received from the server and store the result in the "data" variable.
+    const data = await response.json();
+    const ipAddress = data.ip;
+    // Calling the passed callback with an IP address.
+    callback(ipAddress);
+}
+// Function No.2, which uses function #1 to get the IP address and calls the passed callback.
+function useGetIpAddress6(callback) {
+    // Calls function #1 to get the current IP address.
+    getIpAddress6((ipAddress) => {
+        // When an IP address is received, the passed callback is called with that IP.
+        callback(ipAddress);
+    });
+}
+// Using function No.2 with passing a callback.
+useGetIpAddress6((ipAddress) => {
+    console.log(`6) Your IP address: ${ipAddress}`);
+});

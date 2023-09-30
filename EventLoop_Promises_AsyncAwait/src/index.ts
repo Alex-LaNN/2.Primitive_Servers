@@ -10,7 +10,7 @@ const randomUserApiUrl = "https://random-data-api.com/api/users/random_user";
 // Sending an asynchronous GET request to an external API.
 const response = await fetch(ipifyApiUrl);
 // Parse the JSON response received from the server and store the result in the "data" variable.
-const data: any = await response.json();
+const data = await response.json();
 console.log("1) Your IP address: " + data.ip);
 
 // 2. Asynchronous function to obtain the user's IP address.
@@ -199,7 +199,7 @@ function getRandomUser(): Promise<User> {
       throw new Error(`error HTTP in 4.1: ${response.status}`);
     }
     // Convert the response to 'JSON' and specify the type explicitly.
-    return response.json() as Promise<User>; ///////////??????????????????????
+    return response.json();
   });
 }
 
@@ -291,7 +291,7 @@ async function useGetIpAddress() {
 async function run() {
   try {
     const ipAddress = await useGetIpAddress();
-    console.log(`5) Текущий IP-адрес: ${ipAddress}`);
+    console.log(`5) Your IP address: ${ipAddress}`);
   } catch (error) {
     console.error(`error in 4.2: ${error}`);
   }
@@ -300,3 +300,27 @@ async function run() {
 run();
 
 // 6.
+// Function No.1 for getting the current IP address and calling a callback with this IP.
+async function getIpAddress6(callback: any) {
+  // Sending an asynchronous GET request to an external API.
+  const response = await fetch(ipifyApiUrl);
+  // Parse the JSON response received from the server and store the result in the "data" variable.
+  const data = await response.json();
+  const ipAddress = data.ip;
+  // Calling the passed callback with an IP address.
+  callback(ipAddress);
+}
+
+// Function No.2, which uses function #1 to get the IP address and calls the passed callback.
+function useGetIpAddress6(callback: any) {
+  // Calls function #1 to get the current IP address.
+  getIpAddress6((ipAddress: any) => {
+    // When an IP address is received, the passed callback is called with that IP.
+    callback(ipAddress);
+  });
+}
+
+// Using function No.2 with passing a callback.
+useGetIpAddress6((ipAddress: any) => {
+  console.log(`6) Your IP address: ${ipAddress}`);
+});
