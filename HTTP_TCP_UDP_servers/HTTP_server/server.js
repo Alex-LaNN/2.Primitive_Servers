@@ -11,10 +11,10 @@ const server = http.createServer((req, res) => {
 
   // Displays information about the client's new connection and its IP address.
   const clientAddress = req.socket.remoteAddress;
-  const ipv4Address = clientAddress.includes("::ffff:")
+  const ipAddress = clientAddress.includes("::ffff:")
     ? clientAddress.split("::ffff:")[1]
     : clientAddress;
-  console.log(`Новое подключение от клиента: ${ipv4Address}`);
+  console.log(`Новое подключение от клиента: ${ipAddress}`);
 
   let requestData = "";
 
@@ -40,7 +40,7 @@ const server = http.createServer((req, res) => {
     console.log(`Ответ клиенту: ${requestData}`);
 
     // Closing the connection with the client and displaying information about it.
-    console.log(`Закрытие соединения с клиентом: ${ipv4Address}`);
+    console.log(`Закрытие соединения с клиентом: ${ipAddress}`);
   });
 });
 
