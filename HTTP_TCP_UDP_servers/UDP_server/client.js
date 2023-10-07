@@ -29,7 +29,7 @@ client.send(messageToSend, serverPort, serverAddress, (error) => {
       // Analysis of the correct operation of the server with the output of the corresponding message.
       if (responseData === messageToSend) {
         console.log(
-          `От сервера пришло то же, что и было отправлено:\nОтправлено:    "${responseData}"`
+          `От сервера получено то же, что и было отправлено:\nОтправлено:    "${responseData}"`
         );
       } else
         console.log(

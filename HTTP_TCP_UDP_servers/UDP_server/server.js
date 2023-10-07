@@ -30,7 +30,12 @@ server.on("message", (message, remote) => {
   });
 });
 
+// Setting the "error" event handler for the 'server' object.
+server.on("error", (err) => {
+  console.log(err);
+});
+
 // Binding the server to the specified port and starting listening for incoming requests.
 server.bind(PORT, () => {
-  console.log(`Сервер запущен: http://${HOST}:${PORT}`);
+  console.log(`Сервер запущен с адресом: http://${HOST}:${PORT} `);
 });

@@ -1,0 +1,30 @@
+{
+  "name": "primitive_servers",
+  "version": "1.0.0",
+  "description": "primitive TCP server",
+  "main": "index.js",
+  "scripts": {
+    "s": "node server.js",
+    "c": "node client.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alex-LaNN/Primitive_Servers.git"
+  },
+  "keywords": [],
+  "author": "Alex-LaNN",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alex-LaNN/Primitive_Servers/issues"
+  },
+  "homepage": "https://github.com/Alex-LaNN/Primitive_Servers#readme",
+  "dependencies": {
+    "@types/node-fetch": "^2.6.4",
+    "node-fetch": "^3.3.2"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^20.6.0"
+  }
+}

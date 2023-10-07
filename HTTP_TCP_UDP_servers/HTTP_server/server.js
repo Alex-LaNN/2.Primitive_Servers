@@ -42,6 +42,11 @@ const server = http.createServer((req, res) => {
     // Closing the connection with the client and displaying information about it.
     console.log(`Закрытие соединения с клиентом: ${ipAddress}`);
   });
+
+  // Setting the "error" event handler for the request object (req).
+  req.on("error", (err) => {
+    console.log(err);
+  });
 });
 
 // Starts the server on the specified port and displays a startup message.
