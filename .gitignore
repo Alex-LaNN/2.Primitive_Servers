@@ -1,2 +1,7 @@
 node_modules
 .vscode
+REST_MongoDB/src/modules
+REST_MongoDB/Readme.txt
+REST_MongoDB/nodemon.json
+REST_MongoDB/build/modules
+REST_MongoDB/build/app.js.map
