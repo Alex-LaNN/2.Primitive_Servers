@@ -1,22 +1,20 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const body_parser_1 = __importDefault(require("body-parser"));
-const path_1 = __importDefault(require("path"));
-const currentFile = __filename;
-const currentDir = path_1.default.dirname(currentFile);
-const app = (0, express_1.default)();
-app.use(express_1.default.json());
+import express from "express";
+import bodyParser from 'body-parser';
+import session from "express-session";
+import FileStore from "session-file-store";
+import path from "path";
+import { fileURLToPath } from "url";
+import { items } from "./modules/item.js";
+const currentFile = fileURLToPath(import.meta.url);
+const currentDir = path.dirname(currentFile);
+const app = express();
+app.use(express.json());
 const port = process.env.PORT || 3005;
 app.use("/client", (req, res) => {
-    res.sendFile(path_1.default.resolve(currentDir, "../client/index.html"));
+    res.sendFile(path.resolve(currentDir, "../client/index.html"));
 });
-app.use(body_parser_1.default.json());
+app.use(bodyParser.json());
 let lastItemId = 0;
-const items = [];
 app.get("/api/v1/items", (req, res) => {
     const itemsResponse = items.map((item) => ({
         id: item.id,
@@ -44,12 +42,14 @@ app.put('/api/v1/items', (req, res) => {
     }
     const itemToUpdate = items.find((item) => item.id === id);
     if (!itemToUpdate) {
-        return res.status(404).json({ error: 'Элемент с указанным "id" не найден' });
+        return res
+            .status(404)
+            .json({ error: 'Элемент с указанным "id" не найден' });
     }
     if (text) {
         itemToUpdate.text = text;
     }
-    if (typeof checked === 'boolean') {
+    if (typeof checked === "boolean") {
         itemToUpdate.checked = checked;
     }
     res.json({ ok: true });
@@ -61,9 +61,44 @@ app.delete('/api/v1/items', (req, res) => {
     }
     const itemIndex = items.findIndex((item) => item.id === id);
     if (itemIndex === -1) {
-        return res.status(404).json({ error: 'Элемент с указанным "id" не найден' });
+        return res
+            .status(404)
+            .json({ error: 'Элемент с указанным "id" не найден' });
     }
     items.splice(itemIndex, 1);
+    res.json({ ok: true });
+});
+const FileStoreOptions = {};
+const FileStoreInstance = FileStore(session);
+app.use(session({
+    secret: 'mysecretkey',
+    store: new FileStoreInstance(FileStoreOptions),
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000,
+    },
+}));
+const users = [];
+app.post('/api/v1/login', (req, res) => {
+    const { login, pass } = req.body;
+    const user = users.find((u) => u.login === login && u.pass === pass);
+    if (user) {
+        req.session.user = user;
+        res.json({ ok: true });
+    }
+    else {
+        res.status(401).json({ ok: false });
+    }
+});
+app.post('/api/v1/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.json({ ok: true });
+    });
+});
+app.post('/api/v1/register', (req, res) => {
+    const { login, pass } = req.body;
+    users.push({ login, pass });
     res.json({ ok: true });
 });
 const server = app.listen(port, () => {

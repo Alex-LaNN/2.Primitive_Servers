@@ -1,9 +1,14 @@
 import express, { Request, Response } from "express";
 import bodyParser from 'body-parser';
+import session from "express-session";
+import FileStore from "session-file-store";
 import path from "path";
+import { fileURLToPath } from "url";
+import { User } from './modules/user.js'
+import { items } from "./modules/item.js";
 
 // Определение пути к текущему файлу и его директории.
-const currentFile = __filename;
+const currentFile = fileURLToPath(import.meta.url);
 const currentDir = path.dirname(currentFile);
 
 // Создание Express-приложения.
@@ -23,16 +28,6 @@ app.use(bodyParser.json());
 // Для хранения ID последнего элемента.
 let lastItemId: number = 0;
 
-// Интерфейс массива элементов с полями id, text и checked.
-interface Item {
-  id: number;
-  text: string;
-  checked: boolean;
-}
-
-// Создание массива элементов.
-const items: Item[] = [];
-
 // Роут для получения списка элементов.
 app.get("/api/v1/items", (req: Request, res: Response) => {
   const itemsResponse = items.map((item) => ({
@@ -51,7 +46,7 @@ app.post("/api/v1/items", (req: Request, res: Response) => {
     // Увеличение ID.
     lastItemId++;
     // По умолчанию "checked" равно false (когда задача не выполнена еще).
-    const newItem: Item = { id: lastItemId, text, checked: false };
+    const newItem = { id: lastItemId, text, checked: false };
     // Добавление новой задачи в общий список заметок.
     items.push(newItem);
     // Возвращение 'id' добавленной новой задачи.
@@ -84,6 +79,7 @@ app.put('/api/v1/items', (req: Request, res: Response) => {
     itemToUpdate.text = text;
   }
 
+//  console.log(typeof checked, checked)
   // Присутствие в запросе параметра "checked" типа "boolean" => обновление статуса "checked".
   if (typeof checked === "boolean") {
     itemToUpdate.checked = checked;
@@ -115,6 +111,67 @@ app.delete('/api/v1/items', (req: Request, res: Response) => {
   items.splice(itemIndex, 1);
   res.json({ ok: true });
 });
+
+// Настройка параметров для хранения сессий в файловой системе с использованием 'session-file-store'.
+const FileStoreOptions = {};
+const FileStoreInstance = FileStore(session);
+app.use(
+  session({
+    secret: 'mysecretkey', // Секретный ключ для подписи сессий.
+    store: new FileStoreInstance(FileStoreOptions), // Используем FileStore для хранения сессий.
+    resave: false, // Не сохранять сессию, если в нее ничего не записывалось.
+    saveUninitialized: true, // Сохранять новые сессии, даже если они не были изменены.
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // Продолжительность сессии в миллисекундах (24 часа).
+    },
+  })
+);
+
+// Объявление модуля "express-session" с расширением интерфейса 'SessionData'.
+declare module "express-session" {
+  interface SessionData {
+    user: User;
+  }
+}
+
+// Создание примитивной базы данных пользователей.
+const users: User[] = [];
+
+// Роут для аутентификации (входа) пользователя.
+app.post('/api/v1/login', (req, res) => {
+  const { login, pass } = req.body;
+
+  // Поиск пользователя с указанным логином и паролем.
+  const user = users.find((u) => u.login === login && u.pass === pass);
+
+  if (user) {
+    // Если пользователь найден, сохраняем информацию о нем в сессии.
+    req.session.user = user;
+
+    res.json({ ok: true });
+  } else {
+    // Если пользователь не найден, возвращаем ошибку 401 (Unauthorized).
+    res.status(401).json({ ok: false });
+  }
+});
+
+// Роут для выхода пользователя (удаления сессии).
+app.post('/api/v1/logout', (req, res) => {
+
+  // Удаляем сессию пользователя.
+  req.session.destroy(() => {
+    res.json({ ok: true });
+  });
+});
+
+// Роут для регистрации нового пользователя.
+app.post('/api/v1/register', (req, res) => {
+  const { login, pass } = req.body;
+  // Добавление нового пользователя в имитацию базы данных.
+  users.push({ login, pass });
+  res.json({ ok: true });
+});
+
 
 // Запуск Express-сервера на указанном порту.
 const server = app.listen(port, () => {
