@@ -243,7 +243,9 @@ README:
                 <button @click="apiVersion='v2'" :class="{'selected': apiVersion === 'v2'}">v2</button>
             </div>
             <div>
-                <button @click="getTasks()" class="primary">Поехали</button>
+                <!-- <button @click="getTasks()" class="primary">Поехали</button> -->
+                <button @click="startLogin()" class="primary">Поехали</button>
+                <!-- <button @click="logIn()" class="primary">Поехали</button> -->
             </div>
         </div>
         <div class="wrapper login" v-if="step === 'login'">
@@ -454,6 +456,10 @@ README:
                                 this.step = 'login';
                             }
                         });
+                },
+                startLogin() {
+                    // Для формы входа:
+                    this.step = 'login';
                 },
                 logIn() {
                     if (this.login.trim() !== '' && this.pass.trim()) {

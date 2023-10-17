@@ -1,6 +1,6 @@
 
 // Интерфейс массива элементов с полями id, text и checked.
-interface Item {
+export interface Item {
   id: number;
   text: string;
   checked: boolean;

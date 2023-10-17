@@ -6,3 +6,5 @@ REST_MongoDB/nodemon.json
 REST_MongoDB/build/modules/analytics.js
 REST_MongoDB/build/modules/*.map
 REST_MongoDB/build/app.js.map
+REST_MongoDB/sessions
+REST_MongoDB/all.ts
