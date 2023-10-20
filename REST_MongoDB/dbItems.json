@@ -1,11 +1,6 @@
 {
   "123": [
     {
-      "id": 1,
-      "text": "111",
-      "checked": false
-    },
-    {
       "id": 2,
       "text": "222",
       "checked": false
@@ -14,22 +9,27 @@
       "id": 3,
       "text": "333",
       "checked": false
+    },
+    {
+      "id": 7,
+      "text": "111",
+      "checked": false
     }
   ],
   "456": [
     {
-      "id": 1,
-      "text": "777777",
+      "id": 4,
+      "text": "444",
       "checked": false
     },
     {
-      "id": 2,
-      "text": "888",
+      "id": 5,
+      "text": "555",
       "checked": false
     },
     {
-      "id": 3,
-      "text": "999",
+      "id": 6,
+      "text": "666",
       "checked": false
     }
   ]
