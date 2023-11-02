@@ -1,8 +1,13 @@
 import session from "express-session";
 import FileStore from "session-file-store";
+import { User } from "./user.js";
 
-// Настройки сессии
-const FileStoreOptions = {};
+/*
+ Модуль создания сессии.
+*/
+
+// Настройки сессии.
+const FileStoreOptions = { logFn: function () {} };
 const FileStoreInstance = FileStore(session);
 
 const sessionConfig = {
@@ -14,5 +19,12 @@ const sessionConfig = {
     maxAge: 24 * 60 * 60 * 1000,
   },
 };
+
+// Объявление модуля "express-session" с расширением интерфейса 'SessionData'.
+declare module "express-session" {
+  interface SessionData {
+    user: User;
+  }
+}
 
 export default sessionConfig;

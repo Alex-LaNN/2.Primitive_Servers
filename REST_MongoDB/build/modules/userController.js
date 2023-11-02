@@ -1,4 +1,4 @@
-import * as app from "../app.js";
+import * as app from "./dataController.js";
 export const login = async (req, res) => {
     try {
         const { login, pass } = req.body;
@@ -6,12 +6,11 @@ export const login = async (req, res) => {
         if (user) {
             req.session.regenerate((error) => {
                 if (error) {
-                    console.log(`${error}`);
+                    console.log(`17 ${error}`);
                     return;
                 }
                 req.session.user = user;
-                req.session.save((err) => {
-                    console.log(`${err}`);
+                req.session.save(() => {
                     res.json({ ok: true });
                 });
             });

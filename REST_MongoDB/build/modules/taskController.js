@@ -1,4 +1,4 @@
-import * as app from "../app.js";
+import * as app from "./dataController.js";
 export async function getItems(req, res) {
     try {
         const currentUser = req.session.user;

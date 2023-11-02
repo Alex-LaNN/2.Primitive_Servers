@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import { Item } from "./item.js";
-import * as app from "../app.js";
+import * as app from "./dataController.js";
 
-// Контроллер для получения списка задач текущего пользователя.
+/*
+ Модуль обработки всех запросов.
+*/
+
+// Обработка запроса на получение списка задач текущего пользователя.
 export async function getItems(req: Request, res: Response) {
   try {
     // Получение текущего пользователя из сессии.
@@ -28,7 +32,7 @@ export async function getItems(req: Request, res: Response) {
   }
 }
 
-// Контроллер для создания новой задачи текущего пользователя.
+// Обработка запроса на создание новой задачи текущего пользователя.
 export async function createItem(req: Request, res: Response) {
   try {
     // Получение текущего пользователя из сессии.
@@ -76,7 +80,7 @@ export async function createItem(req: Request, res: Response) {
   }
 }
 
-// Контроллер для обновления задачи текущего пользователя.
+// Обработка запроса на обновление задачи текущего пользователя.
 export async function updateItem(req: Request, res: Response) {
   try {
     // Получение текущего пользователя из сессии.
@@ -133,7 +137,7 @@ export async function updateItem(req: Request, res: Response) {
   }
 }
 
-// Контроллер для удаления задачи текущего пользователя.
+// Обработка запроса на удаление задачи текущего пользователя.
 export async function deleteItem(req: Request, res: Response) {
   try {
     const currentUser = req.session.user;

@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
-import { User } from "./user.js";
-import * as app from "../app.js";
+import * as app from "./dataController.js";
 
-// Контроллер для входа пользователя.
+/*
+ Модуль логики работы с пользователем.
+*/
+
+// Обработка запроса для аутентификации (входа) пользователя.
 export const login = async (req: Request, res: Response) => {
   try {
     const { login, pass } = req.body;
@@ -15,19 +18,17 @@ export const login = async (req: Request, res: Response) => {
       req.session.regenerate((error) => {
         if (error) {
           // Обработка ошибки при сессионной регенерации, если она произошла.
-          console.log(`${error}`);
+          console.log(`17 ${error}`);
           return;
         }
         // Если пользователь найден, сохраняем информацию о нем в сессии.
         req.session.user = user;
         // Сохранение сессии в хранилище.
-        req.session.save((err) => {
-          // Обработка ошибки при сохранении сессии, если она произошла.
-          console.log(`${err}`);
+        req.session.save(() => {
           res.json({ ok: true });
         });
       });
-    } else {
+  } else {
       // Если пользователь не найден => 401 (Unauthorized).
       res.status(401).json({ ok: false });
     }
@@ -37,7 +38,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-// Контроллер для выхода пользователя.
+// Обработка запроса для выхода пользователя.
 export const logout = (req: Request, res: Response) => {
   // Удаление сессии пользователя.
   req.session.destroy(() => {
@@ -45,7 +46,7 @@ export const logout = (req: Request, res: Response) => {
   });
 };
 
-// Контроллер для регистрации нового пользователя.
+// Обработка запроса для регистрации нового пользователя.
 export const register = async (req: Request, res: Response) => {
   try {
     const { login, pass } = req.body;
@@ -61,7 +62,7 @@ export const register = async (req: Request, res: Response) => {
     // Проверка, существует ли пользователь с таким логином.
     const existingUser = users.find((user: any) => user.login === login);
     if (existingUser) {
-      // Если пользователь с таким логином уже существует, возвращаем ошибку.
+      // Если пользователь с таким логином уже существует => возвращается ошибка.
       return res
         .status(400)
         .json({ error: "Пользователь с таким логином уже существует" });
