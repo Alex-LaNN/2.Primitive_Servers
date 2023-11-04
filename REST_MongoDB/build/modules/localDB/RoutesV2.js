@@ -1,9 +1,10 @@
 import express from "express";
-import * as taskController from "../modules/taskController.js";
-import * as userController from "../modules/userController.js";
+import * as taskController from "./taskController.js";
+import * as userController from "./userController.js";
 const router = express.Router();
 router.all("/router", (req, res) => {
     const action = req.query.action;
+    console.log(`10 action: ${action}`);
     if (!action) {
         return res.status(400).json({ error: "Missing 'action' parameter" });
     }

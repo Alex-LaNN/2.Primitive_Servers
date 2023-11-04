@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { Item } from "../modules/item.js";
-import { dataBaseFilePath, numberOfAllTasksFilePath } from "../app.js";
+import { Item } from "./item.js";
+import { dataBaseFilePath, numberOfAllTasksFilePath } from "../../app.js";
 
 /*
  Модуль, обеспечивающий работу приложения с базой данных, представляющей собой набор файлов.
@@ -9,7 +9,6 @@ import { dataBaseFilePath, numberOfAllTasksFilePath } from "../app.js";
 
 // Функция для загрузки пользователей из файла dbUsers.json.
 export async function loadUsersFromDb() {
-  //const dbUsersFilePath = path.resolve(mainPath, "./dbUsers.json");
   const dbUsersFilePath = path.resolve(dataBaseFilePath, "./dbUsers.json");
   try {
     const dbData = await fs.promises.readFile(dbUsersFilePath, "utf-8");
@@ -51,7 +50,6 @@ export async function registerUser(login: string, pass: string) {
 // Функция для загрузки всех задач из файла dbItems.json.
 export async function loadItemsFromDb() {
   // Получение адреса общего файла со всеми тасками всех юзеров.
-  //const dbItemsFilePath = path.resolve(mainPath, "/src/modules/dbUtils/dbItems.json");
   const dbItemsFilePath = path.resolve(dataBaseFilePath, "./dbItems.json");
   try {
     const dbData = await fs.promises.readFile(dbItemsFilePath, "utf-8");

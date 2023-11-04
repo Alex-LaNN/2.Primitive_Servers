@@ -3,7 +3,7 @@ import * as taskController from "./taskController.js";
 import * as userController from "./userController.js";
 
 /*
- Роуты для первого варианта работы приложения (версия api: 'v1'). 
+ Роуты для первого варианта работы приложения (версия api: 'v1') с локальной БД. 
 */
 
 // Создание экземпляра маршрутизатора для Express.

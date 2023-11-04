@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { dataBaseFilePath, numberOfAllTasksFilePath } from "../app.js";
+import { dataBaseFilePath, numberOfAllTasksFilePath } from "../../app.js";
 export async function loadUsersFromDb() {
     const dbUsersFilePath = path.resolve(dataBaseFilePath, "./dbUsers.json");
     try {

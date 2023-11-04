@@ -1,6 +1,6 @@
 import session from "express-session";
 import FileStore from "session-file-store";
-import { User } from "./user.js";
+import { User } from "./models/user.js";
 
 /*
  Модуль создания сессии.

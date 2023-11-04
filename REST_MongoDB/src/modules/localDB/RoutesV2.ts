@@ -1,21 +1,21 @@
 import express from "express";
-import * as taskController from "../modules/taskController.js";
-import * as userController from "../modules/userController.js";
+import * as taskController from "./taskController.js";
+import * as userController from "./userController.js";
 
 /*
- Модуль с переделанной логикой маршрутизации для второго варианта работы приложения (версия api: 'v2'). 
+ Модуль с переделанной логикой маршрутизации для второго варианта работы 
+ приложения (версия api: 'v2') с локальной БД. 
 */
 
 // Создание экземпляра маршрутизатора для Express.
 const router = express.Router();
-console.dir(`6 router: ${router}`)
 
 // Определение обработчика для всех HTTP-методов, обрабатывающего запросы по пути "/router".
 router.all("/router", (req, res) => {
   // Извлечение "action" из строки запроса.
   const action = req.query.action;
   console.log(`10 action: ${action}`);
-  // Если параметр "action" отсутствует => ошибка '400' (Bad Request).
+  // Если параметр "action" отсутствует => ошибка '400'.
   if (!action) {
     return res.status(400).json({ error: "Missing 'action' parameter" });
   }
@@ -44,7 +44,7 @@ router.all("/router", (req, res) => {
       taskController.updateItem(req, res);
       break;
     default:
-      // Если параметр "action" имеет недопустимое значение => ошибка '400' (Bad Request).
+      // Если параметр "action" имеет недопустимое значение => ошибка '400'.
       res.status(400).json({ error: "Invalid 'action' parameter" });
   }
 });

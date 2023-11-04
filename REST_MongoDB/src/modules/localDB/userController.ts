@@ -28,8 +28,8 @@ export const login = async (req: Request, res: Response) => {
           res.json({ ok: true });
         });
       });
-  } else {
-      // Если пользователь не найден => 401 (Unauthorized).
+    } else {
+      // Если пользователь не найден => ошибка '401' (Unauthorized).
       res.status(401).json({ ok: false });
     }
   } catch (error) {
@@ -62,7 +62,7 @@ export const register = async (req: Request, res: Response) => {
     // Проверка, существует ли пользователь с таким логином.
     const existingUser = users.find((user: any) => user.login === login);
     if (existingUser) {
-      // Если пользователь с таким логином уже существует => возвращается ошибка.
+      // Если пользователь с таким логином уже существует => ошибка '400'.
       return res
         .status(400)
         .json({ error: "Пользователь с таким логином уже существует" });
