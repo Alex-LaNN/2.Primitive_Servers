@@ -5,5 +5,9 @@ REST_MongoDB/Readme.txt
 REST_MongoDB/nodemon.json
 REST_MongoDB/build/modules/analytics.js
 REST_MongoDB/build/modules/*.map
-REST_MongoDB/build/app.js.map
+REST_MongoDB/build/modules/mongoDB/*.map
+REST_MongoDB/build/modules/memoryDB/*.map
+REST_MongoDB/build/modules/localDB/*.map
+REST_MongoDB/build/*.map
 REST_MongoDB/sessions
+.env
