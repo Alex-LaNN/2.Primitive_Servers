@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import session from "express-session";
-//import sessionConfig from "../sessionConfig.js";
 import FileStore from "session-file-store";
 import path from "path";
 import { mainPath } from "../../app.js";
@@ -24,8 +23,20 @@ app.use(
 // Используется значение из переменной окружения PORT, либо 3005.
 const port = process.env.PORT || 3005;
 
-// // Используются настройки сессии из sessionConfig.
-// app.use(session(sessionConfig));
+// Настройка параметров для хранения сессий в файловой системе с использованием 'session-file-store'.
+const FileStoreOptions = { logFn: function () {} };
+const FileStoreInstance = FileStore(session);
+app.use(
+  session({
+    secret: "mysecretkey", // Секретный ключ для подписи сессий.
+    store: new FileStoreInstance(FileStoreOptions), // Используем FileStore для хранения сессий.
+    resave: false, // Не сохранять сессию, если в нее ничего не записывалось.
+    saveUninitialized: true, // Сохранять новые сессии, даже если они не были изменены.
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // Продолжительность сессии в миллисекундах (тут 24 часа).
+    },
+  })
+);
 
 // Обработка запроса для получения страницы клиента.
 app.use("/client", (req, res) => {
@@ -38,11 +49,11 @@ app.use(bodyParser.json());
 // Для хранения ID последнего элемента.
 let lastItemId: number = 0;
 
-// Интерфейс массива элементов с полями id, text и completed.
+// Интерфейс массива элементов с полями id, text и checked.
 interface Item {
   id: number;
   text: string;
-  completed: boolean;
+  checked: boolean;
 }
 
 // Создание массива элементов.
@@ -53,7 +64,7 @@ app.get("/api/v1/items", (req: Request, res: Response) => {
   const itemsResponse = items.map((item) => ({
     id: item.id,
     text: item.text,
-    completed: item.completed,
+    checked: item.checked,
   }));
   res.json({ items: itemsResponse });
 });
@@ -65,8 +76,8 @@ app.post("/api/v1/items", (req: Request, res: Response) => {
   if (text) {
     // Увеличение ID.
     lastItemId++;
-    // По умолчанию "completed" равно false (когда задача не выполнена еще).
-    const newItem: Item = { id: lastItemId, text, completed: false };
+    // По умолчанию "checked" равно false (когда задача не выполнена еще).
+    const newItem: Item = { id: lastItemId, text, checked: false };
     // Добавление новой задачи в общий список заметок.
     items.push(newItem);
     // Возвращение 'id' добавленной новой задачи.
@@ -78,8 +89,8 @@ app.post("/api/v1/items", (req: Request, res: Response) => {
 
 // Роут для обновления элемента.
 app.put("/api/v1/items", (req: Request, res: Response) => {
-  // Извлечение параметров запроса (ID, текст и статус "completed") из тела запроса (в формате JSON).
-  const { id, text, completed } = req.body;
+  // Извлечение параметров запроса (ID, текст и статус "checked") из тела запроса (в формате JSON).
+  const { id, text, checked } = req.body;
   // Проверка присутствия параметра "id" в запросе.
   if (!id) {
     return res.status(400).json({ error: 'Параметр "id" отсутствует' });
@@ -99,9 +110,9 @@ app.put("/api/v1/items", (req: Request, res: Response) => {
     itemToUpdate.text = text;
   }
 
-  // Присутствие в запросе параметра "completed" типа "boolean" => обновление статуса "completed".
-  if (typeof completed === "boolean") {
-    itemToUpdate.completed = completed;
+  // Присутствие в запросе параметра "checked" типа "boolean" => обновление статуса "completed".
+  if (typeof checked === "boolean") {
+    itemToUpdate.checked = checked;
   }
 
   // Отправка ответа в формате JSON (подтверждение обновления).
@@ -136,21 +147,6 @@ interface User {
   login: string;
   pass: string;
 }
-
-// Настройка параметров для хранения сессий в файловой системе с использованием 'session-file-store'.
-const FileStoreOptions = {};
-const FileStoreInstance = FileStore(session);
-app.use(
-  session({
-    secret: "mysecretkey", // Секретный ключ для подписи сессий.
-    store: new FileStoreInstance(FileStoreOptions), // Используем FileStore для хранения сессий.
-    resave: false, // Не сохранять сессию, если в нее ничего не записывалось.
-    saveUninitialized: true, // Сохранять новые сессии, даже если они не были изменены.
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // Продолжительность сессии в миллисекундах (тут 24 часа).
-    },
-  })
-);
 
 // Создание базы данных пользователей.
 const users: User[] = [];

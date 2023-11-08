@@ -1,8 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import { app as localApp } from "./modules/localDB/app.js";
-import { app as memoryApp } from "./modules/memoryDB/app.js";
 
 dotenv.config();
 
@@ -15,21 +13,26 @@ export const numberOfAllTasksFilePath =
 
 // Чтение значения DB_TYPE из .env
 const dbType: string | undefined = process.env.DB_TYPE;
+console.log(`18 dbType: ${dbType}`);
 
-// Импорт модуля для работы с выбранной базой данных.
-let app;
+let app: any;
 
-if (dbType === "memory") {
-  app = memoryApp;
-} else if (dbType === "local") {
-//  app = localApp;
+async function importApp() {
+  if (dbType === "memory") {
+    const { app: memoryApp } = await import("./modules/memoryDB/app.js");
+    app = memoryApp;
+  } else if (dbType === "local") {
+    const { app: localApp } = await import("./modules/localDB/app.js");
+    app = localApp;
+  } else if (dbType === "mongo") {
+    const { app: mongoApp } = await import("./modules/mongoDB/app.js");
+    app = mongoApp;
+    // } else if (dbType === "mysql") {
+    //   const { app: mysqlApp } = await import("./mysqlDB/app");
+    //   app = mysqlApp;
+  }
 }
 
-  // if (app) {
-  //   const port: number = parseInt(process.env.PORT || "3005", 10);
+importApp();
 
-  //   // Запуск Express-сервера на указанном порту.
-  //   const server = app.listen(port, () => {
-  //     console.log(`-(app)- Сервер запущен на порту: ${port}`);
-  //   });
-  // }
+export { app };

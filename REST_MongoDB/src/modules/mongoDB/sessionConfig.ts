@@ -1,18 +1,13 @@
 import session from "express-session";
 import FileStore from "session-file-store";
-import { User } from "./models/user.js";
-
-/*
- Модуль создания сессии.
-*/
 
 // Настройки сессии.
 const FileStoreOptions = { logFn: function () {} };
-const FileStoreInstance = FileStore(session);
+const FileStores = FileStore(session);
 
 const sessionConfig = {
   secret: "my_usual_lightweight_secret_key",
-  store: new FileStoreInstance(FileStoreOptions),
+  store: new FileStores(FileStoreOptions),
   resave: true,
   saveUninitialized: true,
   cookie: {
@@ -20,11 +15,10 @@ const sessionConfig = {
   },
 };
 
-// Объявление модуля "express-session" с расширением интерфейса 'SessionData'.
 declare module "express-session" {
   interface SessionData {
-    user: User;
     unicId: string;
+    userIndex: number;
   }
 }
 

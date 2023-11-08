@@ -1,13 +1,14 @@
 import express from "express";
+import session from "express-session";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import cors from "cors";
-import session from "express-session";
-import sessionConfig from "../sessionConfig.js";
+import sessionConfig from "./sessionConfig.js";
 import path from "path";
 import { mainPath } from "../../app.js";
+import connectToMongoDB from "./mongoDB.js"
 import RoutesV1 from "./RoutesV1.js";
-import RoutesV2 from "./RoutesV2.js";
+//import RoutesV2 from "./RoutesV2.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -36,11 +37,12 @@ app.use("/client", (req: any, res: any) => {
 
 app.use(morgan("dev"));
 app.use(bodyParser.json());
+connectToMongoDB();
 
 // Подключение 'RoutesV1' как маршрут для '/api/v1'.
 app.use("/api/v1", RoutesV1);
 // Подключение 'RoutesV2' как маршрут для '/api/v2'.
-app.use("/api/v2", RoutesV2);
+//app.use("/api/v2", RoutesV2);
 
 // Запуск Express-сервера на указанном порту.
 const server = app.listen(port, () => {

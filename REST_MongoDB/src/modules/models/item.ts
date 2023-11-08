@@ -1,17 +1,29 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const Schema = mongoose.Schema;
+interface User {
+  _id: mongoose.Types.ObjectId;
+  login: string;
+  pass: string;
+  todos: Todo[];
+}
 
-const taskSchema = new Schema({
-  login: String,
-  password: String,
-  todos: [
-    {
-      _id: mongoose.Types.ObjectId,
-      text: String,
-      checked: Boolean,
-    },
-  ],
+interface Todo {
+  _id: mongoose.Types.ObjectId;
+  text: string;
+  checked: boolean;
+}
+
+const todoSchema = new Schema<Todo>({
+  _id: Schema.Types.ObjectId,
+  text: String,
+  checked: Boolean,
 });
 
-export const Item = mongoose.model("item", taskSchema);
+const userSchema = new Schema<User>({
+  _id: mongoose.Types.ObjectId,
+  login: String,
+  pass: String,
+  todos: [todoSchema],
+});
+
+export default mongoose.model<User>("User", userSchema);

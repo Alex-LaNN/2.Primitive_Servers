@@ -18,7 +18,7 @@ export const login = async (req: Request, res: Response) => {
       req.session.regenerate((error) => {
         if (error) {
           // Обработка ошибки при сессионной регенерации, если она произошла.
-          console.log(`17 ${error}`);
+          console.log(`21: ${error}`);
           return;
         }
         // Если пользователь найден, сохраняем информацию о нем в сессии.

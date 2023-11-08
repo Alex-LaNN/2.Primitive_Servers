@@ -14,6 +14,17 @@ app.use(cors({
     credentials: true,
 }));
 const port = process.env.PORT || 3005;
+const FileStoreOptions = { logFn: function () { } };
+const FileStoreInstance = FileStore(session);
+app.use(session({
+    secret: "mysecretkey",
+    store: new FileStoreInstance(FileStoreOptions),
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000,
+    },
+}));
 app.use("/client", (req, res) => {
     res.sendFile(path.resolve(mainPath, "./client/index.html"));
 });
@@ -24,7 +35,7 @@ app.get("/api/v1/items", (req, res) => {
     const itemsResponse = items.map((item) => ({
         id: item.id,
         text: item.text,
-        completed: item.completed,
+        checked: item.checked,
     }));
     res.json({ items: itemsResponse });
 });
@@ -32,7 +43,7 @@ app.post("/api/v1/items", (req, res) => {
     const { text } = req.body;
     if (text) {
         lastItemId++;
-        const newItem = { id: lastItemId, text, completed: false };
+        const newItem = { id: lastItemId, text, checked: false };
         items.push(newItem);
         res.json({ id: lastItemId });
     }
@@ -41,7 +52,7 @@ app.post("/api/v1/items", (req, res) => {
     }
 });
 app.put("/api/v1/items", (req, res) => {
-    const { id, text, completed } = req.body;
+    const { id, text, checked } = req.body;
     if (!id) {
         return res.status(400).json({ error: 'Параметр "id" отсутствует' });
     }
@@ -54,8 +65,8 @@ app.put("/api/v1/items", (req, res) => {
     if (text) {
         itemToUpdate.text = text;
     }
-    if (typeof completed === "boolean") {
-        itemToUpdate.completed = completed;
+    if (typeof checked === "boolean") {
+        itemToUpdate.checked = checked;
     }
     res.json({ ok: true });
 });
@@ -73,17 +84,6 @@ app.delete("/api/v1/items", (req, res) => {
     items.splice(itemIndex, 1);
     res.json({ ok: true });
 });
-const FileStoreOptions = {};
-const FileStoreInstance = FileStore(session);
-app.use(session({
-    secret: "mysecretkey",
-    store: new FileStoreInstance(FileStoreOptions),
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        maxAge: 24 * 60 * 60 * 1000,
-    },
-}));
 const users = [];
 app.post("/api/v1/login", (req, res) => {
     const { login, pass } = req.body;

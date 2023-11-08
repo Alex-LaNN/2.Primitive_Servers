@@ -6,7 +6,7 @@ export const login = async (req, res) => {
         if (user) {
             req.session.regenerate((error) => {
                 if (error) {
-                    console.log(`17 ${error}`);
+                    console.log(`21: ${error}`);
                     return;
                 }
                 req.session.user = user;

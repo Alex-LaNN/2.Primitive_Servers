@@ -1,15 +1,14 @@
-import mongoose from "mongoose";
-const Schema = mongoose.Schema;
-const taskSchema = new Schema({
-    login: String,
-    password: String,
-    todos: [
-        {
-            _id: mongoose.Types.ObjectId,
-            text: String,
-            checked: Boolean,
-        },
-    ],
+import mongoose, { Schema } from "mongoose";
+const todoSchema = new Schema({
+    _id: Schema.Types.ObjectId,
+    text: String,
+    checked: Boolean,
 });
-export const Item = mongoose.model("item", taskSchema);
+const userSchema = new Schema({
+    _id: mongoose.Types.ObjectId,
+    login: String,
+    pass: String,
+    todos: [todoSchema],
+});
+export default mongoose.model("User", userSchema);
 //# sourceMappingURL=item.js.map
