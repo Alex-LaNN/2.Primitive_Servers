@@ -10,5 +10,8 @@ const userSchema = new Schema({
     pass: String,
     todos: [todoSchema],
 });
-export default mongoose.model("User", userSchema);
+export const models = {
+    User: mongoose.model("User", userSchema),
+    Todo: mongoose.model("Todo", todoSchema),
+};
 //# sourceMappingURL=item.js.map

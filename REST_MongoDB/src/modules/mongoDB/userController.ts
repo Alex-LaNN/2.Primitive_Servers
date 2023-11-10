@@ -1,15 +1,14 @@
 import { Request, Response } from "express";
 import * as app from "./dataController.js";
-import Item from "../models/item.js";
+import { models } from "../models/item.js";
 import bcrypt from "bcryptjs";
-import session from "express-session";
-//import FileStore from "session-file-store";
-import FileStoreFactory from "session-file-store";
 
-const FileStore = FileStoreFactory(session);
 /*
  Модуль логики работы с пользователем.
 */
+
+// Получение значений из импорта.
+const { User } = models;
 
 // Обработка запроса для регистрации нового пользователя.
 export const register = async (req: Request, res: Response) => {
@@ -22,7 +21,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Проверка, существует ли пользователь с таким логином.
-    const user = await Item.findOne({ login });
+    const user = await User.findOne({ login });
 
     if (user) {
       // Если пользователь с таким логином уже существует => ошибка '400'.
@@ -44,15 +43,15 @@ export const register = async (req: Request, res: Response) => {
 // Обработка запроса для аутентификации (входа) пользователя.
 export const login = async (req: Request, res: Response) => {
   try {
-    const { login, pass } = req.body;
+    const { login } = req.body;
 
-    // Поиск пользователя  с указанным логином и паролем в DB.
-    const user = await Item.findOne({ login });
-    console.dir(`51 (mongoDB.userController): ${user}`)
+    // Поиск пользователя  с указанным логином в DB.
+    const user = await User.findOne({ login });
 
     if (user) {// && 
       // Если пользователь найден => выполняется аутентификация.
       req.session.user = user;
+      
       res.send(JSON.stringify({ ok: true }));
     } else {
       // Если пользователь не найден => ошибка '401' (Unauthorized).
@@ -72,3 +71,16 @@ export const logout = (req: Request, res: Response) => {
   });
 };
 
+// Получение значения Id текущего пользователя.
+export async function getId(req: Request, res: Response) {
+  // Получение текущего пользователя из сессии.
+  const currentUser = req.session.user;
+  const login = currentUser?.login;
+
+  // Поиск пользователя  с указанным логином в DB.
+  const user = await User.findOne({ login });
+  //console.dir(`85 (mongoDB.userController) user: ${user}`);
+  const userId = user?._id;
+  //console.log(`87 uC mDB userId: ${userId}`);
+  return userId
+}

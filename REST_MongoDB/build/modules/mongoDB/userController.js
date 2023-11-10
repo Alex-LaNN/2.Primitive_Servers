@@ -1,15 +1,13 @@
 import * as app from "./dataController.js";
-import Item from "../models/item.js";
-import session from "express-session";
-import FileStoreFactory from "session-file-store";
-const FileStore = FileStoreFactory(session);
+import { models } from "../models/item.js";
+const { User } = models;
 export const register = async (req, res) => {
     try {
         const { login, pass } = req.body;
         if (!login || !pass) {
             return res.status(400).json({ error: "Логин и пароль обязательны" });
         }
-        const user = await Item.findOne({ login });
+        const user = await User.findOne({ login });
         if (user) {
             return res
                 .status(400)
@@ -25,11 +23,9 @@ export const register = async (req, res) => {
 };
 export const login = async (req, res) => {
     try {
-        const { login, pass } = req.body;
-        const user = await Item.findOne({ login });
-        console.dir(`51 (mongoDB.userController): ${user}`);
+        const { login } = req.body;
+        const user = await User.findOne({ login });
         if (user) {
-            console.log(`++++++++++++++`);
             req.session.user = user;
             res.send(JSON.stringify({ ok: true }));
         }
@@ -47,4 +43,11 @@ export const logout = (req, res) => {
         res.json({ ok: true });
     });
 };
+export async function getId(req, res) {
+    const currentUser = req.session.user;
+    const login = currentUser === null || currentUser === void 0 ? void 0 : currentUser.login;
+    const user = await User.findOne({ login });
+    const userId = user === null || user === void 0 ? void 0 : user._id;
+    return userId;
+}
 //# sourceMappingURL=userController.js.map

@@ -1,16 +1,15 @@
-import User from "../models/item.js";
-export async function loadUsersFromDb() { }
-export async function findUserInDb(login, pass) { }
-export async function saveUsersToDb(users) { }
+import mongoose from "mongoose";
+import { models } from "../models/item.js";
+const { User } = models;
 export async function registerUser(login, pass) {
     try {
         const newUser = new User({
+            _id: new mongoose.Types.ObjectId(),
             login,
             pass,
             todos: [],
         });
         const savedUser = await newUser.save();
-        console.dir(`26 (mongoDB.dataController): ${savedUser}`);
         return savedUser;
     }
     catch (error) {
@@ -29,5 +28,4 @@ export async function loadItemsFromDb(user) {
         throw new Error(`Failed to load items from the database: ${error}`);
     }
 }
-export async function readNumberOfAllTasks() { }
 //# sourceMappingURL=dataController.js.map

@@ -2,7 +2,7 @@
  Модуль интерфейса задач пользователя.
 */
 
-// Интерфейс массива элементов с полями id, text и checked.
+// Интерфейс элемента массива с полями id, text и checked.
 export interface Item {
   id: number;
   text: string;

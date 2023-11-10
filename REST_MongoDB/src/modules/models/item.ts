@@ -26,4 +26,9 @@ const userSchema = new Schema<User>({
   todos: [todoSchema],
 });
 
-export default mongoose.model<User>("User", userSchema);
+//export default mongoose.model<User>("User", userSchema);
+
+export const models = {
+  User: mongoose.model<User>("User", userSchema),
+  Todo: mongoose.model<Todo>("Todo", todoSchema),
+};

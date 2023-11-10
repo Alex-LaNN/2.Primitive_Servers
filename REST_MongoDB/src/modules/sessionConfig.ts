@@ -8,7 +8,7 @@ import { User } from "./models/user.js";
 
 // Настройки сессии.
 const FileStoreOptions = { logFn: function () {} };
-const FileStoreInstance = FileStore(session);
+export const FileStoreInstance = FileStore(session);
 
 const sessionConfig = {
   secret: "my_usual_lightweight_secret_key",

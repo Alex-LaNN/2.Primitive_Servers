@@ -58,19 +58,18 @@ export async function createItem(req: Request, res: Response) {
     // Загрузка задач из базы данных (из файла хранения).
     const itemsDb = await app.loadItemsFromDb();
     // Извлечение списка задач текущего пользователя или [], если у пользователя их нет.
-
     const userItems = itemsDb[currentUser.login] || [];
-
     // Генерация уникального ID для новой задачи.
     const newId = await app.incrementNumberOfAllTasks();
-
     // Создание новой задачи.
     const newItem: Item = { id: newId, text, checked: false };
     // Ее добавление в список задач пользователя.
     userItems.push(newItem);
+
     // Сохранение обновленного списока задач в базу данных.
     itemsDb[currentUser.login] = userItems;
     await app.saveItemsToDb(itemsDb);
+
     // Отправка ID новой задачи в ответе.
     res.json({ id: newItem.id });
   } catch (error) {
@@ -101,8 +100,9 @@ export async function updateItem(req: Request, res: Response) {
       return res.status(400).json({ error: 'Параметр "id" отсутствует' });
     }
 
-    // Получение списка задач текущего пользователя.
+    // Загрузка списка всех задач из файла хранения.
     const itemsDb = await app.loadItemsFromDb();
+    // Получение списка задач текущего пользователя.
     const userItems = itemsDb[currentUser.login] || [];
     // Нахождение индекса задачи с указанным "id" в списке задач пользователя.
     const itemIndex = userItems.findIndex(
@@ -129,6 +129,7 @@ export async function updateItem(req: Request, res: Response) {
     // Сохранение обновленного списка задач в базе данных.
     itemsDb[currentUser.login] = userItems;
     await app.saveItemsToDb(itemsDb);
+    
     res.json({ ok: true });
   } catch (error) {
     // Обработка ошибок сервера.
@@ -160,7 +161,7 @@ export async function deleteItem(req: Request, res: Response) {
     const itemsDb = await app.loadItemsFromDb();
     // Получение списка задач текущего пользователя.
     const userItems = itemsDb[currentUser.login] || [];
-    // Нахождение индекса задачи с указанным "id" в списке задач пользователя.
+    // Нахождение задачи с указанным "id" в списке задач пользователя.
     const itemIndex = userItems.findIndex(
       (item: { id: any }) => item.id === id
     );

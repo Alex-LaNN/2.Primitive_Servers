@@ -1,7 +1,7 @@
 import session from "express-session";
 import FileStore from "session-file-store";
 const FileStoreOptions = { logFn: function () { } };
-const FileStoreInstance = FileStore(session);
+export const FileStoreInstance = FileStore(session);
 const sessionConfig = {
     secret: "my_usual_lightweight_secret_key",
     store: new FileStoreInstance(FileStoreOptions),
