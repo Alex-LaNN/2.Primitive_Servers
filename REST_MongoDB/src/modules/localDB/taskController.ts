@@ -3,185 +3,175 @@ import { Item } from "./item.js";
 import * as app from "./dataController.js";
 
 /*
- Модуль обработки всех запросов.
+ Module for processing all requests.
 */
 
-// Обработка запроса на получение списка задач текущего пользователя.
+// Processing a request to obtain a list of tasks for the current user.
 export async function getItems(req: Request, res: Response) {
   try {
-    // Получение текущего пользователя из сессии.
+    // Getting the current user from the session.
     const currentUser = req.session.user;
 
     if (!currentUser) {
-      // Если пользователь не аутентифицирован => ошибка 401.
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      // If the user is not authenticated => 401 error.
+      return res.status(401).json({ error: "User is not authenticated" });
     }
 
-    // Загрузка задач из базы данных(из файла хранения).
+    // Loading tasks from the database (from a storage file).
     const itemsDb = await app.loadItemsFromDb();
-    // Список задач текущего пользователя или пустой массив, если у пользователя их нет.
+    // A list of tasks for the current user, or an empty array if the user does not have any.
     const userItems = itemsDb[currentUser.login] || [];
 
     res.json({ items: userItems });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling GET /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
-// Обработка запроса на создание новой задачи текущего пользователя.
+// Processing a request to create a new task for the current user.
 export async function createItem(req: Request, res: Response) {
   try {
-    // Получение текущего пользователя из сессии.
+    // Getting the current user from the session.
     const currentUser = req.session.user;
 
     if (!currentUser) {
-      // Если пользователь не аутентифицирован => ошибка 401.
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      // If the user is not authenticated => 401 error.
+      return res.status(401).json({ error: "User is not authenticated" });
     }
 
-    // Получение текста задачи из тела запроса.
+    // Retrieving the task text from the request body.
     const { text } = req.body;
 
     if (!text) {
-      // Если текст отсутствует или пуст => ошибка 400 (Bad Request).
+      // If the text is missing or empty => error 400 (Bad Request).
       return res
         .status(400)
-        .json({ error: 'Параметр "text" отсутствует или пуст' });
+        .json({ error: 'The "text" parameter is missing or empty' });
     }
 
-    // Загрузка задач из базы данных (из файла хранения).
+    // Loading tasks from the database being used (from a storage file).
     const itemsDb = await app.loadItemsFromDb();
-    // Извлечение списка задач текущего пользователя или [], если у пользователя их нет.
+    // Retrieves the current user's list of tasks, or [] if the user doesn't have any.
     const userItems = itemsDb[currentUser.login] || [];
-    // Генерация уникального ID для новой задачи.
+    // Generating a unique ID for a new task.
     const newId = await app.incrementNumberOfAllTasks();
-    // Создание новой задачи.
+    // Create a new task.
     const newItem: Item = { id: newId, text, checked: false };
-    // Ее добавление в список задач пользователя.
+    // Adding it to the user's task list.
     userItems.push(newItem);
 
-    // Сохранение обновленного списока задач в базу данных.
+    // Saving the updated task list to the database.
     itemsDb[currentUser.login] = userItems;
     await app.saveItemsToDb(itemsDb);
 
-    // Отправка ID новой задачи в ответе.
+    // Sending the 'id' of the new task in the response.
     res.json({ id: newItem.id });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling POST /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
-// Обработка запроса на обновление задачи текущего пользователя.
+// Processing a request to update a task for the current user.
 export async function updateItem(req: Request, res: Response) {
   try {
-    // Получение текущего пользователя из сессии.
+    // Getting the current user from the session.
     const currentUser = req.session.user;
 
     if (!currentUser) {
-      // Если пользователь не аутентифицирован => ошибка 401.
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      // If the user is not authenticated => 401 error.
+      return res.status(401).json({ error: "User is not authenticated" });
     }
 
-    // Извлечение параметров "id", "text" и "checked" из запроса.
+    // Extracting the "id", "text" and "checked" parameters from the request.
     const { id, text, checked } = req.body;
 
     if (!id) {
-      // Если параметр "id" отсутствует => ошибка 400 (Bad Request).
-      return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+      // If the "id" parameter is missing => error 400 (Bad Request).
+      return res.status(400).json({ error: 'The "id" parameter is missing' });
     }
 
-    // Загрузка списка всех задач из файла хранения.
+    // Loading a list of all tasks from a storage file.
     const itemsDb = await app.loadItemsFromDb();
-    // Получение списка задач текущего пользователя.
+    // Retrieving a list of tasks for the current user.
     const userItems = itemsDb[currentUser.login] || [];
-    // Нахождение индекса задачи с указанным "id" в списке задач пользователя.
+    // Finding the index of a task with the specified "id" in the user's task list.
     const itemIndex = userItems.findIndex(
       (item: { id: any }) => item.id === id
     );
 
     if (itemIndex === -1) {
-      // Если задача с указанным "id" не найдена => ошибка 404 (Not Found).
+      // If a task with the specified "id" is not found => error 404 (Not Found).
       return res
         .status(404)
-        .json({ error: 'Элемент с указанным "id" не найден' });
+        .json({ error: 'The element with the specified "id" was not found' });
     }
 
     if (text) {
-      // Если задан параметр "text" => обновление текста задачи.
+      // If the 'text' parameter is set => updating the task text.
       userItems[itemIndex].text = text;
     }
 
-    if (typeof checked === "boolean") {
-      // Если задан параметр "checked" как булево значение => обновление его.
-      userItems[itemIndex].checked = checked;
-    }
+    // Update 'checked' parameter.
+    userItems[itemIndex].checked = checked;
 
-    // Сохранение обновленного списка задач в базе данных.
+    // Saving the updated task list in the database.
     itemsDb[currentUser.login] = userItems;
     await app.saveItemsToDb(itemsDb);
-    
+
     res.json({ ok: true });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling PUT /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
-// Обработка запроса на удаление задачи текущего пользователя.
+// Process a request to delete a specific task of the current user.
 export async function deleteItem(req: Request, res: Response) {
   try {
     const currentUser = req.session.user;
-
+    // If the user is not authenticated => 401 error.
     if (!currentUser) {
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      return res.status(401).json({ error: "User is not authenticated" });
     }
 
-    // Извлечение параметра "id" из тела запроса.
+    // Extracting the "id" parameter from the request body.
     const { id } = req.body;
 
     if (!id) {
-      // Если параметр "id" отсутствует => ошибка 400 (Bad Request).
-      return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+      // If the "id" parameter is missing => error 400 (Bad Request).
+      return res.status(400).json({ error: 'The "id" parameter is missing' });
     }
 
-    // Загрузка задач из базы данных.
+    // Loading tasks from the database.
     const itemsDb = await app.loadItemsFromDb();
-    // Получение списка задач текущего пользователя.
+    // Retrieving a list of tasks for the current user.
     const userItems = itemsDb[currentUser.login] || [];
-    // Нахождение задачи с указанным "id" в списке задач пользователя.
+    // Finding a task with the specified "id" in the user's task list.
     const itemIndex = userItems.findIndex(
       (item: { id: any }) => item.id === id
     );
 
     if (itemIndex === -1) {
-      // Если задача с указанным "id" не найдена => ошибка 404 (Not Found).
+      // If a task with the specified "id" is not found => error 404 (Not Found).
       return res
         .status(404)
-        .json({ error: 'Элемент с указанным "id" не найден' });
+        .json({ error: 'The element with the specified "id" was not found' });
     }
 
-    // Удаление задачи с найденным "id" из списка задач пользователя.
+    // Removing a task with a found "id" from the user's task list.
     userItems.splice(itemIndex, 1);
-    // Обновление базы данных с обновленным списком задач.
+    // Update the database with an updated list of tasks.
     itemsDb[currentUser.login] = userItems;
     await app.saveItemsToDb(itemsDb);
 
     res.json({ ok: true });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling DELETE /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }

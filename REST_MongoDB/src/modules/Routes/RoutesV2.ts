@@ -5,18 +5,16 @@ import * as taskControllerMongo from "../mongoDB/taskController.js";
 import * as userControllerMongo from "../mongoDB/userController.js";
 
 /*
- Модуль с переделанной логикой маршрутизации для второго варианта работы 
- приложения (версия api: 'v2') с БД, указанной в файле .env. 
+ A module with simplified routing logic for the second version of the application (api version: 'v2') with the database specified in the '.env' file. 
 */
 
-// Определение типа базы данных из переменной окружения.
+// Determining the database type from an environment variable.
 const dbType: string | any = process.env.DB_TYPE;
-console.dir(`14 dbType: ${dbType}`);
 
-// Создание экземпляра маршрутизатора для Express.
+// Create a router instance for Express.
 const router = express.Router();
 
-// Функция для выбора контроллеров в зависимости от значения 'DB_TYPE'.
+// Function for selecting controllers depending on the 'DB_TYPE' value.
 const getControllers = (dbType: string) => {
   switch (dbType) {
     case "local":
@@ -28,19 +26,19 @@ const getControllers = (dbType: string) => {
   }
 };
 
-// Получение контроллеров в зависимости от значения 'DB_TYPE'.
+// Getting controllers depending on the 'DB_TYPE' value.
 const { taskController, userController } = getControllers(dbType);
 
-// Определение обработчика для всех HTTP-методов, обрабатывающего запросы по пути "/router".
+// Defining a handler for all HTTP methods that processes requests along the "/router" path.
 router.all("/router", (req, res) => {
-  // Извлечение "action" из строки запроса.
+  // Extracting "action" from a query string.
   const action = req.query.action;
-  // Если параметр "action" отсутствует => ошибка '400'.
+  // If the "action" parameter is missing => error '400'.
   if (!action) {
-    return res.status(400).json({ error: "Missing 'action' parameter" });
+    return res.status(400).json({ error: "Missing 'action' parameter!" });
   }
 
-  // В зависимости от значения 'action', вызывается нужный контроллер с соответствующим запросом.
+  // Depending on the 'action' value, the desired controller is called with the appropriate request.
   switch (action) {
     case "login":
       userController.login(req, res);
@@ -64,10 +62,9 @@ router.all("/router", (req, res) => {
       taskController.updateItem(req, res);
       break;
     default:
-      // Если параметр "action" имеет недопустимое значение => ошибка '400'.
-      res.status(400).json({ error: "Invalid 'action' parameter" });
+      // If the "action" parameter has an invalid value => error '400'.
+      res.status(400).json({ error: "Invalid 'action' parameter!" });
   }
 });
 
-// Экспорт маршрутизатора.
 export default router;

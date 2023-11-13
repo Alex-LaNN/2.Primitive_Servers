@@ -1,14 +1,14 @@
 [
   {
+    "login": "321",
+    "pass": "$2a$10$czoresfbTNnaspOeGLc6DuJGKSUnZ0TytWlm9ZltqQBhMn/CrQcKS"
+  },
+  {
     "login": "123",
-    "pass": "456"
+    "pass": "$2a$10$RSlypV.ALAZXVEsyUSwg6.Rn.PUjPbQLFeioscv2AUA.NWStscKOS"
   },
   {
     "login": "456",
-    "pass": "789"
-  },
-  {
-    "login": "789",
-    "pass": "789"
+    "pass": "$2a$10$2WWYq7PxwbAspU9X/zyaSed8GXTASG6CY4qKEbug2t5k4K2p2ZQ2a"
   }
 ]

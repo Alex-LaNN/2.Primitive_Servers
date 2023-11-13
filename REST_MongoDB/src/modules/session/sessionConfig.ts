@@ -1,12 +1,12 @@
 import session from "express-session";
 import FileStore from "session-file-store";
-import { User } from "./models/user.js";
+import { User } from "../models/user.js";
 
 /*
- Модуль создания сессии.
+ Session creation module.
 */
 
-// Настройки сессии.
+// Session settings.
 const FileStoreOptions = { logFn: function () {} };
 export const FileStoreInstance = FileStore(session);
 
@@ -20,7 +20,7 @@ const sessionConfig = {
   },
 };
 
-// Объявление модуля "express-session" с расширением интерфейса 'SessionData'.
+// Declaration of the 'express-session' module with the 'SessionData' interface extension.
 declare module "express-session" {
   interface SessionData {
     user: User;

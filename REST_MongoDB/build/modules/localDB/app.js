@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import morgan from "morgan";
 import cors from "cors";
 import session from "express-session";
-import sessionConfig from "../sessionConfig.js";
+import sessionConfig from "../session/sessionConfig.js";
 import path from "path";
 import { mainPath } from "../../app.js";
 import RoutesV1 from "../Routes/RoutesV1.js";
@@ -26,7 +26,6 @@ app.use(bodyParser.json());
 app.use("/api/v1", RoutesV1);
 app.use("/api/v2", RoutesV2);
 const server = app.listen(port, () => {
-    console.log(`Сервер запущен на порту: ${port}`);
+    console.log(`The server is running on the port: ${port}`);
 });
 export { app };
-//# sourceMappingURL=app.js.map

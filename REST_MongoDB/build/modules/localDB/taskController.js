@@ -3,9 +3,7 @@ export async function getItems(req, res) {
     try {
         const currentUser = req.session.user;
         if (!currentUser) {
-            return res
-                .status(401)
-                .json({ error: "Пользователь не аутентифицирован" });
+            return res.status(401).json({ error: "User is not authenticated" });
         }
         const itemsDb = await app.loadItemsFromDb();
         const userItems = itemsDb[currentUser.login] || [];
@@ -20,15 +18,13 @@ export async function createItem(req, res) {
     try {
         const currentUser = req.session.user;
         if (!currentUser) {
-            return res
-                .status(401)
-                .json({ error: "Пользователь не аутентифицирован" });
+            return res.status(401).json({ error: "User is not authenticated" });
         }
         const { text } = req.body;
         if (!text) {
             return res
                 .status(400)
-                .json({ error: 'Параметр "text" отсутствует или пуст' });
+                .json({ error: 'The "text" parameter is missing or empty' });
         }
         const itemsDb = await app.loadItemsFromDb();
         const userItems = itemsDb[currentUser.login] || [];
@@ -48,13 +44,11 @@ export async function updateItem(req, res) {
     try {
         const currentUser = req.session.user;
         if (!currentUser) {
-            return res
-                .status(401)
-                .json({ error: "Пользователь не аутентифицирован" });
+            return res.status(401).json({ error: "User is not authenticated" });
         }
         const { id, text, checked } = req.body;
         if (!id) {
-            return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+            return res.status(400).json({ error: 'The "id" parameter is missing' });
         }
         const itemsDb = await app.loadItemsFromDb();
         const userItems = itemsDb[currentUser.login] || [];
@@ -62,14 +56,12 @@ export async function updateItem(req, res) {
         if (itemIndex === -1) {
             return res
                 .status(404)
-                .json({ error: 'Элемент с указанным "id" не найден' });
+                .json({ error: 'The element with the specified "id" was not found' });
         }
         if (text) {
             userItems[itemIndex].text = text;
         }
-        if (typeof checked === "boolean") {
-            userItems[itemIndex].checked = checked;
-        }
+        userItems[itemIndex].checked = checked;
         itemsDb[currentUser.login] = userItems;
         await app.saveItemsToDb(itemsDb);
         res.json({ ok: true });
@@ -83,13 +75,11 @@ export async function deleteItem(req, res) {
     try {
         const currentUser = req.session.user;
         if (!currentUser) {
-            return res
-                .status(401)
-                .json({ error: "Пользователь не аутентифицирован" });
+            return res.status(401).json({ error: "User is not authenticated" });
         }
         const { id } = req.body;
         if (!id) {
-            return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+            return res.status(400).json({ error: 'The "id" parameter is missing' });
         }
         const itemsDb = await app.loadItemsFromDb();
         const userItems = itemsDb[currentUser.login] || [];
@@ -97,7 +87,7 @@ export async function deleteItem(req, res) {
         if (itemIndex === -1) {
             return res
                 .status(404)
-                .json({ error: 'Элемент с указанным "id" не найден' });
+                .json({ error: 'The element with the specified "id" was not found' });
         }
         userItems.splice(itemIndex, 1);
         itemsDb[currentUser.login] = userItems;
@@ -109,4 +99,3 @@ export async function deleteItem(req, res) {
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
-//# sourceMappingURL=taskController.js.map

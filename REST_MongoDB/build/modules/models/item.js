@@ -14,4 +14,3 @@ export const models = {
     User: mongoose.model("User", userSchema),
     Todo: mongoose.model("Todo", todoSchema),
 };
-//# sourceMappingURL=item.js.map

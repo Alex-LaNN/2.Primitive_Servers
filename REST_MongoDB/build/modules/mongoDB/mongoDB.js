@@ -7,4 +7,3 @@ const connectToMongoDB = () => {
         .catch((error) => console.log(`failed to connect to MongoDB: ${error}`));
 };
 export default connectToMongoDB;
-//# sourceMappingURL=mongoDB.js.map

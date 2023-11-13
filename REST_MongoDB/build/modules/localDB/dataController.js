@@ -11,10 +11,10 @@ export async function loadUsersFromDb() {
         return [];
     }
 }
-export async function findUserInDb(login, pass) {
+export async function findUserInDb(login) {
     try {
         const users = await loadUsersFromDb();
-        return users.find((user) => user.login === login && user.pass === pass);
+        return users.find((user) => user.login === login);
     }
     catch (error) {
         console.error("Error while reading users from the database:", error);
@@ -23,7 +23,13 @@ export async function findUserInDb(login, pass) {
 }
 export async function saveUsersToDb(users) {
     const data = JSON.stringify(users, null, 2);
-    await fs.promises.writeFile("dbUsers.json", data, "utf8");
+    const dBUsersFilePath = path.resolve(dataBaseFilePath, "./dbUsers.json");
+    try {
+        await fs.promises.writeFile(dBUsersFilePath, data, "utf8");
+    }
+    catch (err) {
+        console.log(`43 dC: Error write file to DB: ${err}`);
+    }
 }
 export async function registerUser(login, pass) {
     const users = await loadUsersFromDb();
@@ -51,19 +57,24 @@ export async function readNumberOfAllTasks() {
         return parseInt(data, 10);
     }
     catch (error) {
-        console.error("Ошибка чтения файла numberOfAllTasks.json", error);
+        console.error("Error reading file 'numberOfAllTasks.json'", error);
         return 0;
     }
 }
 export async function incrementNumberOfAllTasks() {
     const currentNumber = await readNumberOfAllTasks();
-    const newNumber = currentNumber + 1;
+    let newNumber;
+    if (currentNumber > 0) {
+        newNumber = currentNumber + 1;
+    }
+    else {
+        newNumber = 1;
+    }
     try {
         await fs.promises.writeFile(numberOfAllTasksFilePath, newNumber.toString(), "utf-8");
     }
     catch (error) {
-        console.error("Ошибка записи в numberOfAllTasks.json", error);
+        console.error("Error writing to 'numberOfAllTasks.json'", error);
     }
     return newNumber;
 }
-//# sourceMappingURL=dataController.js.map

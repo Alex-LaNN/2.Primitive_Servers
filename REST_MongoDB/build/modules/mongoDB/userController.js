@@ -1,11 +1,12 @@
-import * as app from "./dataController.js";
+import mongoose from "mongoose";
 import { models } from "../models/item.js";
+import bcrypt from "bcryptjs";
 const { User } = models;
 export const register = async (req, res) => {
     try {
         const { login, pass } = req.body;
         if (!login || !pass) {
-            return res.status(400).json({ error: "Логин и пароль обязательны" });
+            return res.status(400).json({ error: "Login and password are required" });
         }
         const user = await User.findOne({ login });
         if (user) {
@@ -13,7 +14,8 @@ export const register = async (req, res) => {
                 .status(400)
                 .json({ error: "Пользователь с таким логином уже существует" });
         }
-        await app.registerUser(login, pass);
+        const encryptedPassword = await bcrypt.hash(req.body.pass, 10);
+        await registerUser(login, encryptedPassword);
         res.json({ ok: true });
     }
     catch (error) {
@@ -23,11 +25,11 @@ export const register = async (req, res) => {
 };
 export const login = async (req, res) => {
     try {
-        const { login } = req.body;
+        const { login, pass } = req.body;
         const user = await User.findOne({ login });
-        if (user) {
+        if (user && (await bcrypt.compare(pass, String(user.pass)))) {
             req.session.user = user;
-            res.send(JSON.stringify({ ok: true }));
+            res.send({ ok: true });
         }
         else {
             res.status(401).json({ ok: false });
@@ -50,4 +52,18 @@ export async function getId(req, res) {
     const userId = user === null || user === void 0 ? void 0 : user._id;
     return userId;
 }
-//# sourceMappingURL=userController.js.map
+async function registerUser(login, pass) {
+    try {
+        const newUser = new User({
+            _id: new mongoose.Types.ObjectId(),
+            login,
+            pass,
+            todos: [],
+        });
+        const savedUser = await newUser.save();
+        return savedUser;
+    }
+    catch (error) {
+        throw new Error(`Failed to register user: ${error}`);
+    }
+}

@@ -9,57 +9,56 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Создание Express-приложения.
+// Creating an Express application.
 const app = express();
-// Приложение будет использовать JSON-парсер для обработки JSON-запросов.
+// The application will use a JSON parser to process JSON requests.
 app.use(express.json());
-// Использование 'CORS' для обработки CORS-запросов.
+// Using 'CORS' to process CORS requests.
 app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
   })
 );
-// Используется значение из переменной окружения PORT, либо 3005.
+// The value from the 'PORT' environment variable is used, or 3005.
 const port = process.env.PORT || 3005;
 
-// Настройка параметров для хранения сессий в файловой системе с использованием 'session-file-store'.
+// Configuring settings for storing sessions on the file system using 'session-file-store'.
 const FileStoreOptions = { logFn: function () {} };
 const FileStoreInstance = FileStore(session);
 app.use(
   session({
-    secret: "mysecretkey", // Секретный ключ для подписи сессий.
-    store: new FileStoreInstance(FileStoreOptions), // Используем FileStore для хранения сессий.
-    resave: false, // Не сохранять сессию, если в нее ничего не записывалось.
-    saveUninitialized: true, // Сохранять новые сессии, даже если они не были изменены.
+    secret: "mysecretkey",
+    store: new FileStoreInstance(FileStoreOptions), // Using 'FileStore' to store sessions.
+    resave: false, // Do not save a session if nothing has been recorded to it.
+    saveUninitialized: true, // Save new sessions even if they have not been modified.
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // Продолжительность сессии в миллисекундах (тут 24 часа).
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );
 
-// Обработка запроса для получения страницы клиента.
+// Processing a request to obtain a client page.
 app.use("/client", (req, res) => {
   res.sendFile(path.resolve(mainPath, "./client/index.html"));
 });
 
-//app.use(cors());
 app.use(bodyParser.json());
 
-// Для хранения ID последнего элемента.
+// To store the 'id' of the last element.
 let lastItemId: number = 0;
 
-// Интерфейс массива элементов с полями id, text и checked.
+// Interface of an array of elements with 'id', 'text' and 'checked' fields.
 interface Item {
   id: number;
   text: string;
   checked: boolean;
 }
 
-// Создание массива элементов.
+// Creating an array of elements.
 const items: Item[] = [];
 
-// Роут для получения списка элементов.
+// Route to get a list of elements.
 app.get("/api/v1/items", (req: Request, res: Response) => {
   const itemsResponse = items.map((item) => ({
     id: item.id,
@@ -69,132 +68,130 @@ app.get("/api/v1/items", (req: Request, res: Response) => {
   res.json({ items: itemsResponse });
 });
 
-// Роут для создания нового элемента.
+// Route for creating a new element.
 app.post("/api/v1/items", (req: Request, res: Response) => {
   const { text } = req.body;
 
   if (text) {
-    // Увеличение ID.
+    // Increase 'id'.
     lastItemId++;
-    // По умолчанию "checked" равно false (когда задача не выполнена еще).
+    // By default 'checked' is 'false' (when the task is relevant).
     const newItem: Item = { id: lastItemId, text, checked: false };
-    // Добавление новой задачи в общий список заметок.
+    // Adding a new task to the general list of notes.
     items.push(newItem);
-    // Возвращение 'id' добавленной новой задачи.
+    // Return the 'id' of the added new task.
     res.json({ id: lastItemId });
   } else {
-    res.status(400).json({ error: 'Параметр "text" отсутствует или пуст' });
+    res.status(400).json({ error: 'The "text" parameter is missing or empty' });
   }
 });
 
-// Роут для обновления элемента.
+// Route to update the element.
 app.put("/api/v1/items", (req: Request, res: Response) => {
-  // Извлечение параметров запроса (ID, текст и статус "checked") из тела запроса (в формате JSON).
+  // Extract request parameters ('id', 'text' and 'checked' status) from the request body.
   const { id, text, checked } = req.body;
-  // Проверка присутствия параметра "id" в запросе.
+  // Checking the presence of the 'id' parameter in the request.
   if (!id) {
-    return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+    return res.status(400).json({ error: 'The "id" parameter is missing' });
   }
 
-  // Поиск элемента в массиве 'items' по ID.
+  // Searching for an element in the 'items' array by 'id'.
   const itemToUpdate = items.find((item) => item.id === id);
-  // Проверка наличия элемента с указанным ID.
+  // Checking the presence of an element with the specified 'id'.
   if (!itemToUpdate) {
     return res
       .status(404)
-      .json({ error: 'Элемент с указанным "id" не найден' });
+      .json({ error: 'The element with the specified "id" was not found' });
   }
 
-  // Присутствие в запросе параметра "text" => обновление текста элемента.
+  // Presence of the 'text' parameter in the request => updating the element's text.
   if (text) {
     itemToUpdate.text = text;
   }
 
-  // Присутствие в запросе параметра "checked" типа "boolean" => обновление статуса "completed".
-  if (typeof checked === "boolean") {
-    itemToUpdate.checked = checked;
-  }
+  // Updating the 'checked' parameter.
+  itemToUpdate.checked = checked;
 
-  // Отправка ответа в формате JSON (подтверждение обновления).
+  // Sending a response (update confirmation).
   res.json({ ok: true });
 });
 
-// Роут для удаления элемента.
+// Route to delete the element.
 app.delete("/api/v1/items", (req: Request, res: Response) => {
-  // Извлечение параметра "id" из тела DELETE-запроса (в формате JSON).
+  // Extracting the 'id' parameter from the 'DELETE request' body.
   const { id } = req.body;
-  // Проверка на присутствие параметра "id" в запросе.
+  // Checking for the presence of the 'id' parameter in the request.
   if (!id) {
-    return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+    return res.status(400).json({ error: 'The "id" parameter is missing' });
   }
 
-  // Поиск индекса элемента в массиве 'items' по ID.
+  // Finding the index of an element in the 'items' array by 'id'.
   const itemIndex = items.findIndex((item) => item.id === id);
-  // Проверка, найден ли элемент с указанным ID.
+  // Checks whether an element with the specified 'id' is found.
   if (itemIndex === -1) {
     return res
       .status(404)
-      .json({ error: 'Элемент с указанным "id" не найден' });
+      .json({ error: 'The element with the specified "id" was not found' });
   }
 
-  // Удаление элемента из массива 'items' по найденному индексу.
+  // Removing an element from the 'items' array at the found index.
   items.splice(itemIndex, 1);
   res.json({ ok: true });
 });
 
-// Определение интерфейса для данных пользователя
+// Defining the interface for user data.
 interface User {
   login: string;
   pass: string;
 }
 
-// Создание базы данных пользователей.
+// Creating a database with all users.
 const users: User[] = [];
 
-// Объявление модуля "express-session" с расширением интерфейса 'SessionData'.
+// Declaration of the 'express-session' module with the 'SessionData' interface extension.
 declare module "express-session" {
   interface SessionData {
     user: User;
   }
 }
 
-// Роут для аутентификации (входа) пользователя.
+// Route for user authentication (login).
 app.post("/api/v1/login", (req, res) => {
   const { login, pass } = req.body;
 
-  // Поиск пользователя с указанным логином и паролем.
+  // Search for a user with the specified 'login' and 'password'.
   const user = users.find((u) => u.login === login && u.pass === pass);
 
   if (user) {
-    // Если пользователь найден, сохраняем информацию о нем в сессии.
+    // If the user is found => saving information about him in the session.
     req.session.user = user;
 
     res.json({ ok: true });
   } else {
-    // Если пользователь не найден, возвращаем ошибку 401 (Unauthorized).
+    // If the user is not found => error 401 (Unauthorized).
     res.status(401).json({ ok: false });
   }
 });
 
-// Роут для выхода пользователя (удаления сессии).
+// Route for user exit (session deletion).
 app.post("/api/v1/logout", (req, res) => {
-  // Удаляем сессию пользователя.
+  // Deleting a user session.
   req.session.destroy(() => {
     res.json({ ok: true });
   });
 });
 
-// Роут для регистрации нового пользователя.
+// Route for registering a new user.
 app.post("/api/v1/register", (req, res) => {
   const { login, pass } = req.body;
-  // Добавление нового пользователя в имитацию базы данных (простейший пример).
+  // Adding a new user to the database.
   users.push({ login, pass });
   res.json({ ok: true });
 });
 
-// Запуск Express-сервера на указанном порту.
+// Start 'Express server' on the specified port.
 const server = app.listen(port, () => {
-  console.log(`Сервер запущен на порту: ${port}`);
+  console.log(`The server is running on the port: ${port}`);
 });
 
 export { app };

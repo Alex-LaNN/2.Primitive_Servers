@@ -1,13 +1,13 @@
 /*
- Модуль интерфейса задач пользователя.
+ User task interface module.
 */
 
-// Интерфейс элемента массива с полями id, text и checked.
+// Array element interface with 'id', 'text' and 'checked' fields.
 export interface Item {
   id: number;
   text: string;
   checked: boolean;
 }
 
-// Создание массива элементов.
+// Creating an array of elements.
 export const items: Item[] = [];

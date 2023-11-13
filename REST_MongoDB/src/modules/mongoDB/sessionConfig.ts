@@ -1,10 +1,15 @@
 import session from "express-session";
 import FileStore from "session-file-store";
 
-// Настройки сессии.
-const FileStoreOptions = { logFn: function () {} };
+/**
+ * Session configuration module in Express.
+ */
+
+// Options for session storage in the file system.
+const FileStoreOptions = { logFn: function () {} }; // { to disable logging }.
 const FileStores = FileStore(session);
 
+// Session configuration.
 const sessionConfig = {
   secret: "my_usual_lightweight_secret_key",
   store: new FileStores(FileStoreOptions),
@@ -15,6 +20,7 @@ const sessionConfig = {
   },
 };
 
+// Extending session data types for use in an Express application.
 declare module "express-session" {
   interface SessionData {
     unicId: string;

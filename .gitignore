@@ -1,10 +1,9 @@
 node_modules
 .vscode
-**/*.map
+build
 REST_MongoDB/src/modules/analytics.ts
 REST_MongoDB/Readme.txt
 REST_MongoDB/nodemon.json
 REST_MongoDB/build/modules/analytics.js
 REST_MongoDB/sessions
 .env
-REST_MongoDB/build

@@ -48,38 +48,36 @@ app.post("/api/v1/items", (req, res) => {
         res.json({ id: lastItemId });
     }
     else {
-        res.status(400).json({ error: 'Параметр "text" отсутствует или пуст' });
+        res.status(400).json({ error: 'The "text" parameter is missing or empty' });
     }
 });
 app.put("/api/v1/items", (req, res) => {
     const { id, text, checked } = req.body;
     if (!id) {
-        return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+        return res.status(400).json({ error: 'The "id" parameter is missing' });
     }
     const itemToUpdate = items.find((item) => item.id === id);
     if (!itemToUpdate) {
         return res
             .status(404)
-            .json({ error: 'Элемент с указанным "id" не найден' });
+            .json({ error: 'The element with the specified "id" was not found' });
     }
     if (text) {
         itemToUpdate.text = text;
     }
-    if (typeof checked === "boolean") {
-        itemToUpdate.checked = checked;
-    }
+    itemToUpdate.checked = checked;
     res.json({ ok: true });
 });
 app.delete("/api/v1/items", (req, res) => {
     const { id } = req.body;
     if (!id) {
-        return res.status(400).json({ error: 'Параметр "id" отсутствует' });
+        return res.status(400).json({ error: 'The "id" parameter is missing' });
     }
     const itemIndex = items.findIndex((item) => item.id === id);
     if (itemIndex === -1) {
         return res
             .status(404)
-            .json({ error: 'Элемент с указанным "id" не найден' });
+            .json({ error: 'The element with the specified "id" was not found' });
     }
     items.splice(itemIndex, 1);
     res.json({ ok: true });
@@ -107,7 +105,6 @@ app.post("/api/v1/register", (req, res) => {
     res.json({ ok: true });
 });
 const server = app.listen(port, () => {
-    console.log(`Сервер запущен на порту: ${port}`);
+    console.log(`The server is running on the port: ${port}`);
 });
 export { app };
-//# sourceMappingURL=app.js.map

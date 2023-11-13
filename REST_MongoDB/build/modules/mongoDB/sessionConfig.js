@@ -12,4 +12,3 @@ const sessionConfig = {
     },
 };
 export default sessionConfig;
-//# sourceMappingURL=sessionConfig.js.map

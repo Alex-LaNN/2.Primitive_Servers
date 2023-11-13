@@ -5,16 +5,16 @@ import * as taskControllerMongo from "../mongoDB/taskController.js";
 import * as userControllerMongo from "../mongoDB/userController.js";
 
 /*
- Роуты для первого варианта работы приложения (версия api: 'v1') с БД, указанной в файле .env. 
+ Routes for the first version of the application (api version: 'v1') with the database specified in the '.env' file. 
 */
 
-// Определение типа базы данных из переменной окружения.
+// Determining the database type from an environment variable.
 const dbType: string | any = process.env.DB_TYPE;
 
-// Создание экземпляра маршрутизатора для Express.
+// Create a router instance for Express.
 const router = express.Router();
 
-// Функция для выбора контроллеров в зависимости от значения 'DB_TYPE'.
+// Function for selecting controllers depending on the 'DB_TYPE' value.
 const getControllers = (dbType: string) => {
   switch (dbType) {
     case "local":
@@ -26,9 +26,10 @@ const getControllers = (dbType: string) => {
   }
 };
 
-// Получение контроллеров в зависимости от значения 'DB_TYPE'.
+// Getting controllers depending on the 'DB_TYPE' value.
 const { taskController, userController } = getControllers(dbType);
 
+// Setting routes for various operations in the application.
 router.get("/items", taskController.getItems);
 router.post("/items", taskController.createItem);
 router.put("/items", taskController.updateItem);
@@ -37,5 +38,4 @@ router.post("/login", userController.login);
 router.post("/logout", userController.logout);
 router.post("/register", userController.register);
 
-// Экспорт маршрутизатора.
 export default router;

@@ -1,124 +1,122 @@
 import mongoose from "mongoose";
 import { Request, Response } from "express";
-import * as app from "./dataController.js";
 import * as getUser from "./userController.js"
 import { models } from "../models/item.js";
 
-// Получение значений из импорта.
+/**
+ * A module responsible for the operation of the application with user tasks.
+ */
+
+// Getting the 'User' value from the import.
 const { User } = models;
 
-// Обработка запроса на получение списка задач текущего пользователя.
+// Processing a request to obtain a list of tasks for the current user.
 export async function getItems(req: Request, res: Response) {
   try {
-    // Получение текущего пользователя из сессии.
+    // Getting the current user from the session.
     const currentUser = req.session.user;
 
     if (!currentUser) {
-      // Если пользователь не аутентифицирован => ошибка 401.
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      // If the user is not authenticated => 401 error.
+      return res.status(401).json({ error: "User is not authenticated!" });
     }
 
-    // Получение списка задач текущего пользователя из БД.
-    const userItems = await app.loadItemsFromDb(currentUser);
+    // Retrieving a list of tasks for the current user from the database.
+    const userItems = await loadItemsFromDb(currentUser);
+    // Bringing fields from the database into line with the values of the front fields ('_id' => 'id').
     const resItems = userItems.map((item: any) => {
       return { id: item._id, text: item.text, checked: item.checked };
-    })
+    });
 
     res.json({ items: resItems });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling GET /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
-// Обработка запроса на создание новой задачи текущего пользователя.
+// Processing a request to create a new task for the current user.
 export async function createItem(req: Request, res: Response) {
   try {
-    // Получение значения Id текущего пользователя.
+    // Getting the 'id' value of the current user.
     const userId = await getUser.getId(req, res);
 
     if (!req.session.user || undefined) {
-      // Если пользователь не аутентифицирован => ошибка 401.
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      // If the user is not authenticated => 401 error.
+      return res.status(401).json({ error: "User is not authenticated!" });
     }
 
-    // Получение текста задачи из тела запроса.
+    // Retrieving the task text from the request body.
     const { text } = req.body;
 
     if (!text) {
-      // Если текст отсутствует => ошибка 400 (Bad Request).
+      // If there is no text => error 400 (Bad Request).
       return res
         .status(400)
-        .json({ error: 'Параметр "text" отсутствует или пуст' });
+        .json({ error: 'The "text" parameter is missing or empty!' });
     }
 
-    // Создание новой задачи.
+    // Create a new task.
     const newItem = {
       _id: new mongoose.Types.ObjectId(),
       text,
       checked: false,
     };
 
-    // Добавление новой задачи в массив 'todos' текущего пользователя.
+    // Adding a new task to the current user's 'todos' array.
     await User.updateOne({ _id: userId }, { $push: { todos: newItem } });
 
-    // Отправка ID новой задачи в ответе.
+    // Sending the new task 'id' in the response.
     res.json({ id: newItem._id });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling POST /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
-// Обработка запроса на обновление задачи текущего пользователя.
+// Processing a request to update a task for the current user.
 export async function updateItem(req: Request, res: Response) {
   try {
-    // Получение текущего пользователя из сессии.
+    // Getting the current user from the session.
     const currentUser = req.session.user;
-    // Получение значения Id текущего пользователя.
+    // Getting the 'id' value of the current user.
     const userId = await getUser.getId(req, res);
 
     if (!currentUser) {
-      // Если пользователь не аутентифицирован => ошибка 401.
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      // If the user is not authenticated => 401 error.
+      return res.status(401).json({ error: "User is not authenticated!" });
     }
 
-    // Извлечение параметров 'id', 'text' и 'checked' из запроса.
+    // Extracting the 'id', 'text' and 'checked' parameters from the request body.
     const { id, text, checked } = req.body;
 
-    // Получение списка задач текущего пользователя из БД.
-    const userTodos = (await app.loadItemsFromDb(currentUser)) || [];
-    // Нахождение 'id' задачи в списке задач пользователя.
+    // Retrieving a list of tasks for the current user from the database.
+    const userTodos = (await loadItemsFromDb(currentUser)) || [];
+    // Finding the task 'id' in the user's task list.
     const itemIndex = userTodos.findIndex(
       (todo: { _id: mongoose.Types.ObjectId }) => todo._id.toString() === id
     );
     if (itemIndex === -1) {
-      // Если задача с указанным 'id' не найдена => ошибка 404 (Not Found).
+      // If a task with the specified 'id' is not found => error 404 (Not Found).
       return res
         .status(404)
-        .json({ error: 'Элемент с указанным "id" не найден' });
+        .json({ error: 'The element with the specified "id" was not found!' });
     }
 
-    // Получение задачи для редактирования из списка задач текущего пользователя.
+    // Getting a task to edit from the current user's task list.
     const todo = userTodos[itemIndex];
 
     if (text) {
-      // Если в запросе присутствует параметр 'text' => обновление текста задачи.
+      // If the request contains the 'text' parameter => updating the task text.
       todo.text = text;
     }
 
-    // Обновление параметра 'checked'.
+    // Update 'checked' parameter.
     todo.checked = checked;
 
-    //Сохранение обновленного списка задач текущего пользователя в БД.
+    // Saving the updated list of tasks of the current user in the database.
     await User.updateOne(
       { _id: userId, "todos._id": id },
       {
@@ -131,42 +129,59 @@ export async function updateItem(req: Request, res: Response) {
 
     res.json({ ok: true });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling PUT /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
-// Обработка запроса на удаление задачи текущего пользователя.
+// Processing a request to delete a task for the current user.
 export async function deleteItem(req: Request, res: Response) { 
   try {
-    // Получение текущего пользователя из сессии.
+    // Getting the current user from the session.
     const currentUser = req.session.user;
 
     if (!currentUser) {
-      return res
-        .status(401)
-        .json({ error: "Пользователь не аутентифицирован" });
+      // If the user is not authenticated => 401 error.
+      return res.status(401).json({ error: "User is not authenticated!" });
     }
 
-    // Получение значения 'id' текущего пользователя.
+    // Getting the 'id' value of the current user.
     const userId = await getUser.getId(req, res);
 
-    // Извлечение параметра 'id' удаляемой задачи из тела запроса.
+    // Extracting the 'id' parameter of the task to be deleted from the request body.
     const { id } = req.body;
 
     if (!id) {
-      // Если параметр 'id' отсутствует => ошибка 400 (Bad Request).
-      return res.status(400).json({ error: 'Параметр "id" (удаляемой задачи) отсутствует' });
+      // If the 'id' parameter is missing => error 400 (Bad Request).
+      return res.status(400).json({
+        error: 'The "id" parameter (of the task to be deleted) is missing!',
+      });
     }
 
-    // Удаление задачи с найденным 'id' из списка задач пользователя.
+    // Removing a task with the found 'id' from the user's task list.
     await User.updateOne({ _id: userId }, { $pull: { todos: { _id: id } } });
 
     res.json({ ok: true });
   } catch (error) {
-    // Обработка ошибок сервера.
+    // Handling server errors.
     console.error("Error while handling DELETE /api/v1/items:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
- }
+}
+ 
+// Function to load all tasks of a specific user from 'MongoDB'.
+async function loadItemsFromDb(user: any) {
+  try {
+    // Retrieving a user by his 'id'.
+    const foundUser = await User.findById(user._id);
+
+    if (!foundUser) {
+      throw new Error("User not found");
+    }
+
+    return foundUser.todos;
+  } catch (error) {
+    throw new Error(`Failed to load items from the database: ${error}`);
+  }
+}
